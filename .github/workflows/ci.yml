@@ -18,7 +18,7 @@ jobs:
       - run: npm run prettier
       - run: npm run lint
       - run: npm run typecheck
-      - run: npm test -- --ci
+      - run: npm test -- --ci --coverage
       # Non-blocking until #20 (RN upgrade): current advisories live inside
       # react-native's own dependency tree (Metro/Babel/ws/shell-quote) —
       # build-time tooling, not code shipped in the app.

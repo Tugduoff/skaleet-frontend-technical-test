@@ -1,0 +1,28 @@
+appId: com.skaleetfrontendtechnicaltest
+---
+# Smoke flow: create a beneficiary, make a transaction with them, restart
+# the app, and verify the state persisted (balance + history).
+- launchApp:
+    clearState: true
+- tapOn: 'Beneficiaries'
+- tapOn: 'Beneficiary name'
+- inputText: 'John Doe'
+- tapOn: 'Beneficiary IBAN'
+- inputText: 'GB29 NWBK 6016 1331 9268 19'
+- hideKeyboard
+- tapOn: 'Add Beneficiary'
+- assertVisible: 'IBAN: GB29NWBK60161331926819'
+- back
+- tapOn: 'Add Transaction'
+- tapOn: 'Enter amount'
+- inputText: '10.50'
+- hideKeyboard
+# The beneficiary just created is the picker's default selection.
+- tapOn: 'Submit Transaction'
+- assertVisible: 'Current Balance: $989.50'
+- assertVisible: 'Amount: $10.50'
+- assertVisible: 'To: John Doe'
+- stopApp
+- launchApp
+- assertVisible: 'Current Balance: $989.50'
+- assertVisible: 'To: John Doe'

@@ -9,6 +9,7 @@
     "typecheck": "tsc --noEmit",
     "start": "react-native start",
     "test": "jest",
+    "test:e2e": "maestro test maestro/transaction-flow.yaml",
     "prettier": "prettier --check .",
     "prettier-format": "prettier --write .",
     "prepare": "husky"
@@ -32,6 +33,7 @@
     "@react-native/eslint-config": "0.73.2",
     "@react-native/metro-config": "0.73.5",
     "@react-native/typescript-config": "0.73.1",
+    "@testing-library/react-native": "^12.9.0",
     "@types/react": "^18.3.3",
     "@types/react-test-renderer": "^18.3.0",
     "babel-jest": "^29.7.0",
