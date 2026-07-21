@@ -11,8 +11,11 @@ export default [
   ...tseslint.configs.recommended,
   pluginReact.configs.flat.recommended,
   {
-    files: ["*.config.js", "jest/**/*.js"],
+    files: ["*.config.js", ".eslintrc.js", ".prettierrc.js", "jest/**/*.js"],
     languageOptions: { globals: { ...globals.node, ...globals.jest } },
     rules: { "@typescript-eslint/no-require-imports": "off" },
+  },
+  {
+    settings: { react: { version: "detect" } },
   },
 ];
