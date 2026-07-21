@@ -4,4 +4,3 @@ module.exports = {
   plugins: ['@typescript-eslint'],
   extends: ['@react-native-community', 'plugin:@typescript-eslint/recommended'],
 };
- 
