@@ -43,7 +43,7 @@ Conventional Commits style, `<type>: <short summary>`:
 - `test:` adding or fixing tests
 - `chore:` tooling, deps, config, CI
 
-Keep messages in the imperative mood ("add x", not "added x"), one logical change per commit.
+Keep messages in the imperative mood ("add x", not "added x"), one logical change per commit. Single line only — no body; details belong in the PR description.
 
 ## Pull requests
 
