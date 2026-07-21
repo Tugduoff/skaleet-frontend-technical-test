@@ -25,10 +25,11 @@ Other commands:
 npm test              # jest
 npm run lint           # eslint
 npm run typecheck      # tsc --noEmit
+npm run prettier       # check formatting
 npm run prettier-format # format everything in place
 ```
 
-Git hooks (husky + lint-staged): pre-commit runs eslint --fix and prettier on staged files, pre-push runs the test suite. CI (GitHub Actions) runs lint, typecheck and tests on every PR and on main.
+Git hooks (husky + lint-staged): pre-commit runs eslint --fix and prettier on staged files, pre-push runs the test suite. CI (GitHub Actions) checks formatting, runs lint, typecheck, tests and a prod-dependency audit on every PR and on main, and builds the Android debug APK. Dependabot opens weekly grouped npm and GitHub Actions update PRs.
 
 ## Commit messages
 
