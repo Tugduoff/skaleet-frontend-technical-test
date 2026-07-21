@@ -10,4 +10,9 @@ export default [
   pluginJs.configs.recommended,
   ...tseslint.configs.recommended,
   pluginReact.configs.flat.recommended,
+  {
+    files: ["*.config.js", "jest/**/*.js"],
+    languageOptions: { globals: { ...globals.node, ...globals.jest } },
+    rules: { "@typescript-eslint/no-require-imports": "off" },
+  },
 ];
