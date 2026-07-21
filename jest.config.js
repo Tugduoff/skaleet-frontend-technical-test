@@ -6,6 +6,6 @@ module.exports = {
   setupFiles: ['react-native/jest/setup.js', './jest/setup.js'],
   moduleNameMapper: {
     '^@react-native-async-storage/async-storage$':
-      '@react-native-async-storage/async-storage/jest',
+      '@react-native-async-storage/async-storage/jest/async-storage-mock',
   },
 };
