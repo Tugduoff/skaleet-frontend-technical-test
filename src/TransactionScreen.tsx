@@ -1,99 +1,53 @@
-import React, { useRef, useState } from 'react';
-import { View, Text, TextInput, Button } from 'react-native';
+import React from 'react';
+import { View, Text, TextInput, Button, StyleSheet } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
-import { useTransactions } from './TransactionContext';
-import { getAmountError } from './utils/amount';
-import { isValidIban } from './utils/iban';
-import { getSelectedBeneficiary } from './utils/beneficiaries';
-import type { Account, RootStackParamList } from './types';
+
+import { useTransactionScreen } from './hooks/useTransactionScreen';
+import type { RootStackParamList } from './types';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Transaction'>;
 
 const TransactionScreen = ({ navigation }: Props) => {
-  const [amount, setAmount] = useState('');
-  const [name, setName] = useState('');
-  const [iban, setIban] = useState('');
-  const [selection, setSelection] = useState<number | 'manual' | null>(null);
-  const [amountError, setAmountError] = useState('');
-  const [nameError, setNameError] = useState('');
-  const [ibanError, setIbanError] = useState('');
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const submittingRef = useRef(false);
-  const { addTransaction, balanceCents, beneficiaries } = useTransactions();
-
-  const useManualEntry = selection === 'manual' || beneficiaries.length === 0;
-  const selectedBeneficiary = getSelectedBeneficiary(
+  const {
+    amount,
+    setAmount,
+    name,
+    setName,
+    iban,
+    setIban,
+    setSelection,
+    amountError,
+    nameError,
+    ibanError,
+    isSubmitting,
+    useManualEntry,
+    selectedBeneficiary,
     beneficiaries,
-    typeof selection === 'number' ? selection : null,
-  );
+    submit,
+  } = useTransactionScreen();
 
   const handleTransaction = () => {
-    if (submittingRef.current || isSubmitting) {
-      return;
+    if (submit()) {
+      navigation.goBack();
     }
-    setAmountError('');
-    setNameError('');
-    setIbanError('');
-    const amountErrorMessage = getAmountError(amount, balanceCents);
-    if (amountErrorMessage) {
-      setAmountError(amountErrorMessage);
-      return;
-    }
-    let account: Account | null = null;
-    if (useManualEntry) {
-      if (name.trim() === '') {
-        setNameError('Please enter a name');
-        return;
-      }
-      if (!isValidIban(iban)) {
-        setIbanError('Please enter a valid IBAN');
-        return;
-      }
-      account = { name: name.trim(), iban };
-    } else if (selectedBeneficiary) {
-      account = {
-        name: selectedBeneficiary.name,
-        iban: selectedBeneficiary.iban,
-      };
-    }
-    if (!account) {
-      return;
-    }
-    submittingRef.current = true;
-    setIsSubmitting(true);
-    if (!addTransaction(amount, account)) {
-      submittingRef.current = false;
-      setAmountError('Transaction could not be completed, please try again');
-      setIsSubmitting(false);
-      return;
-    }
-    navigation.goBack();
   };
 
   return (
-    <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+    <View style={styles.container}>
       <TextInput
-        style={{
-          height: 40,
-          borderColor: 'gray',
-          borderWidth: 1,
-          width: '80%',
-          marginVertical: 8,
-        }}
+        style={styles.input}
         onChangeText={setAmount}
         value={amount}
         keyboardType="numeric"
         placeholder="Enter amount"
       />
-      {amountError ? (
-        <Text style={{ color: 'red', marginBottom: 8 }}>{amountError}</Text>
-      ) : null}
+      {amountError ? <Text style={styles.error}>{amountError}</Text> : null}
       {beneficiaries.length > 0 && (
         <Picker
           selectedValue={useManualEntry ? 'manual' : selectedBeneficiary?.id}
           onValueChange={(value: number | 'manual') => setSelection(value)}
-          style={{ width: '80%' }}>
+          style={styles.picker}>
           {beneficiaries.map(beneficiary => (
             <Picker.Item
               key={beneficiary.id}
@@ -107,40 +61,24 @@ const TransactionScreen = ({ navigation }: Props) => {
       {useManualEntry && (
         <>
           {beneficiaries.length === 0 && (
-            <Text style={{ marginVertical: 8 }}>
+            <Text style={styles.hint}>
               No saved beneficiaries — enter the recipient manually
             </Text>
           )}
           <TextInput
-            style={{
-              height: 40,
-              borderColor: 'gray',
-              borderWidth: 1,
-              width: '80%',
-              marginVertical: 8,
-            }}
+            style={styles.input}
             onChangeText={setName}
             value={name}
             placeholder="Recipient Name"
           />
-          {nameError ? (
-            <Text style={{ color: 'red', marginBottom: 8 }}>{nameError}</Text>
-          ) : null}
+          {nameError ? <Text style={styles.error}>{nameError}</Text> : null}
           <TextInput
-            style={{
-              height: 40,
-              borderColor: 'gray',
-              borderWidth: 1,
-              width: '80%',
-              marginVertical: 8,
-            }}
+            style={styles.input}
             onChangeText={setIban}
             value={iban}
             placeholder="Recipient IBAN"
           />
-          {ibanError ? (
-            <Text style={{ color: 'red', marginBottom: 8 }}>{ibanError}</Text>
-          ) : null}
+          {ibanError ? <Text style={styles.error}>{ibanError}</Text> : null}
         </>
       )}
       <Button
@@ -151,5 +89,30 @@ const TransactionScreen = ({ navigation }: Props) => {
     </View>
   );
 };
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  input: {
+    height: 40,
+    borderColor: 'gray',
+    borderWidth: 1,
+    width: '80%',
+    marginVertical: 8,
+  },
+  picker: {
+    width: '80%',
+  },
+  hint: {
+    marginVertical: 8,
+  },
+  error: {
+    color: 'red',
+    marginBottom: 8,
+  },
+});
 
 export default TransactionScreen;

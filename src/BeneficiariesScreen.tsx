@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import {
   View,
   Text,
@@ -8,39 +8,20 @@ import {
   StyleSheet,
 } from 'react-native';
 
-import { useTransactions } from './TransactionContext';
-import { isValidIban, normalizeIban } from './utils/iban';
+import { useBeneficiariesScreen } from './hooks/useBeneficiariesScreen';
 import type { Beneficiary } from './types';
 
 const BeneficiariesScreen = () => {
-  const { beneficiaries, addBeneficiary } = useTransactions();
-  const [name, setName] = useState('');
-  const [iban, setIban] = useState('');
-  const [nameError, setNameError] = useState('');
-  const [ibanError, setIbanError] = useState('');
-
-  const handleAdd = () => {
-    setNameError('');
-    setIbanError('');
-    if (name.trim() === '') {
-      setNameError('Please enter a name');
-      return;
-    }
-    if (!isValidIban(iban)) {
-      setIbanError('Please enter a valid IBAN');
-      return;
-    }
-    const isDuplicate = beneficiaries.some(
-      beneficiary => normalizeIban(beneficiary.iban) === normalizeIban(iban),
-    );
-    if (isDuplicate) {
-      setIbanError('This beneficiary already exists');
-      return;
-    }
-    addBeneficiary(name.trim(), iban);
-    setName('');
-    setIban('');
-  };
+  const {
+    beneficiaries,
+    name,
+    setName,
+    iban,
+    setIban,
+    nameError,
+    ibanError,
+    handleAdd,
+  } = useBeneficiariesScreen();
 
   const renderItem = ({ item }: { item: Beneficiary }) => (
     <View style={styles.item}>

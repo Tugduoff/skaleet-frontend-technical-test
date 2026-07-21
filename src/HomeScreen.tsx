@@ -1,15 +1,14 @@
 import React from 'react';
 import { View, Text, Button, FlatList, StyleSheet } from 'react-native';
 
-import { useTransactions } from './TransactionContext';
-import { formatAmount } from './utils/amount';
+import { useHomeScreen } from './hooks/useHomeScreen';
 import type { RootStackParamList, Transaction } from './types';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Home'>;
 
 const HomeScreen = ({ navigation }: Props) => {
-  const { transactions, balanceCents } = useTransactions();
+  const { transactions, balanceCents, formatAmount } = useHomeScreen();
 
   const renderItem = ({ item }: { item: Transaction }) => (
     <View style={styles.item}>
