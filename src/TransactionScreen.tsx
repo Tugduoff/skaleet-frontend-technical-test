@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { View, Text, TextInput, Button } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import { useTransactions } from './TransactionContext';
@@ -19,6 +19,7 @@ const TransactionScreen = ({ navigation }: Props) => {
   const [nameError, setNameError] = useState('');
   const [ibanError, setIbanError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const submittingRef = useRef(false);
   const { addTransaction, balanceCents, beneficiaries } = useTransactions();
 
   const useManualEntry = selection === 'manual' || beneficiaries.length === 0;
@@ -28,7 +29,7 @@ const TransactionScreen = ({ navigation }: Props) => {
   );
 
   const handleTransaction = () => {
-    if (isSubmitting) {
+    if (submittingRef.current || isSubmitting) {
       return;
     }
     setAmountError('');
@@ -59,10 +60,12 @@ const TransactionScreen = ({ navigation }: Props) => {
     if (!account) {
       return;
     }
+    submittingRef.current = true;
     setIsSubmitting(true);
     // The context re-validates and can still refuse, e.g. if the balance
     // changed since this screen rendered.
     if (!addTransaction(amount, account)) {
+      submittingRef.current = false;
       setAmountError('Transaction could not be completed, please try again');
       setIsSubmitting(false);
       return;

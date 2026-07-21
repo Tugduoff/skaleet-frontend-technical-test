@@ -47,6 +47,45 @@ describe('storage', () => {
     expect(await loadState()).toBeNull();
   });
 
+  it('returns null when balanceCents is not a non-negative safe integer', async () => {
+    await AsyncStorage.setItem(
+      'app-state',
+      JSON.stringify({
+        version: 2,
+        transactions: [],
+        balanceCents: 100.5,
+        beneficiaries: [],
+      }),
+    );
+    expect(await loadState()).toBeNull();
+
+    await AsyncStorage.setItem(
+      'app-state',
+      JSON.stringify({
+        version: 2,
+        transactions: [],
+        balanceCents: -100,
+        beneficiaries: [],
+      }),
+    );
+    expect(await loadState()).toBeNull();
+  });
+
+  it('returns null when transaction amountCents is invalid', async () => {
+    await AsyncStorage.setItem(
+      'app-state',
+      JSON.stringify({
+        version: 2,
+        transactions: [
+          { id: 1, amountCents: 10.5, account: { name: 'X', iban: 'Y' } },
+        ],
+        balanceCents: 0,
+        beneficiaries: [],
+      }),
+    );
+    expect(await loadState()).toBeNull();
+  });
+
   it('returns null when stored fields have wrong types', async () => {
     await AsyncStorage.setItem(
       'app-state',
