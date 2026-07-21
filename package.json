@@ -9,8 +9,8 @@
     "typecheck": "tsc --noEmit",
     "start": "react-native start",
     "test": "jest",
-    "prettier": "prettier 'src/**/*.+(js|ts|jsx|tsx|json)'",
-    "prettier-format": "prettier --ignore-path .gitignore --write \"**/*.+(js|ts|jsx|tsx|json)\"",
+    "prettier": "prettier --check .",
+    "prettier-format": "prettier --write .",
     "prepare": "husky"
   },
   "dependencies": {
