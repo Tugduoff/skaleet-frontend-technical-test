@@ -29,7 +29,7 @@ npm run prettier       # check formatting
 npm run prettier-format # format everything in place
 ```
 
-Git hooks (husky + lint-staged): pre-commit runs eslint --fix and prettier on staged files, pre-push runs the test suite. CI (GitHub Actions) checks formatting, runs lint, typecheck, tests (with coverage thresholds) and a prod-dependency audit on every PR and on main, and builds the Android debug APK. Dependabot opens weekly grouped npm and GitHub Actions update PRs.
+Git hooks (husky + lint-staged): pre-commit runs eslint --fix and prettier on staged files, pre-push runs the test suite. CI (GitHub Actions) checks formatting, runs lint, typecheck, tests (with coverage thresholds) and a prod-dependency audit on every PR and on main; the Android debug APK build runs on main pushes, on PRs touching native files, and manually (to save CI minutes). Dependabot opens weekly grouped npm and GitHub Actions update PRs.
 
 ## E2E tests (Maestro)
 
