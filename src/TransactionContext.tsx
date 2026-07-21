@@ -48,13 +48,8 @@ export const TransactionProvider = ({ children }: { children: ReactNode }) => {
   const [beneficiaries, setBeneficiaries] = useState<Beneficiary[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Authoritative copy of the balance. State updates are asynchronous, so
-  // checking the balanceCents state directly would let two rapid calls both
-  // pass the overdraft check against the same stale value.
   const balanceRef = useRef(INITIAL_BALANCE_CENTS);
 
-  // Load the persisted state once, then save on every change (skipping the
-  // initial load so stored data is not overwritten before it is read).
   useEffect(() => {
     let cancelled = false;
     loadState().then(state => {
@@ -80,15 +75,12 @@ export const TransactionProvider = ({ children }: { children: ReactNode }) => {
     }
   }, [transactions, balanceCents, beneficiaries, isLoading]);
 
-  // Monotonic ids: Date.now() can repeat within the same millisecond.
   const lastId = useRef(0);
   const nextId = () => {
     lastId.current = Math.max(Date.now(), lastId.current + 1);
     return lastId.current;
   };
 
-  // The context validates the amount itself: the no-overdraft invariant must
-  // hold even for a caller that skips UI validation.
   const addTransaction = (amount: string, account: Account): boolean => {
     const amountCents = parseAmountToCents(amount);
     if (

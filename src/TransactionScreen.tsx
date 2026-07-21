@@ -62,8 +62,6 @@ const TransactionScreen = ({ navigation }: Props) => {
     }
     submittingRef.current = true;
     setIsSubmitting(true);
-    // The context re-validates and can still refuse, e.g. if the balance
-    // changed since this screen rendered.
     if (!addTransaction(amount, account)) {
       submittingRef.current = false;
       setAmountError('Transaction could not be completed, please try again');
