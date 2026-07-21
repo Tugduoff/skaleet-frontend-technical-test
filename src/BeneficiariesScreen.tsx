@@ -20,6 +20,8 @@ const BeneficiariesScreen = () => {
   const [ibanError, setIbanError] = useState('');
 
   const handleAdd = () => {
+    setNameError('');
+    setIbanError('');
     if (name.trim() === '') {
       setNameError('Please enter a name');
       return;
@@ -28,8 +30,6 @@ const BeneficiariesScreen = () => {
       setIbanError('Please enter a valid IBAN');
       return;
     }
-    setNameError('');
-    setIbanError('');
     addBeneficiary(name.trim(), iban.trim());
     setName('');
     setIban('');
