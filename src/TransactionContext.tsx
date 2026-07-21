@@ -47,7 +47,7 @@ export const TransactionProvider = ({ children }: { children: ReactNode }) => {
     const newTransaction = {
       id: nextId(),
       amount: parseFloat(amount),
-      account,
+      account: { ...account, iban: normalizeIban(account.iban) },
     };
     setTransactions(prevTransactions => [...prevTransactions, newTransaction]);
     setBalance(prevBalance => prevBalance - parseFloat(amount));
@@ -55,13 +55,17 @@ export const TransactionProvider = ({ children }: { children: ReactNode }) => {
 
   const addBeneficiary = (name: string, iban: string) => {
     setBeneficiaries(prevBeneficiaries => {
+      const normalizedIban = normalizeIban(iban);
       const isDuplicate = prevBeneficiaries.some(
-        beneficiary => normalizeIban(beneficiary.iban) === normalizeIban(iban),
+        beneficiary => beneficiary.iban === normalizedIban,
       );
       if (isDuplicate) {
         return prevBeneficiaries;
       }
-      return [...prevBeneficiaries, { id: nextId(), name, iban }];
+      return [
+        ...prevBeneficiaries,
+        { id: nextId(), name, iban: normalizedIban },
+      ];
     });
   };
 

@@ -44,7 +44,7 @@ const TransactionScreen = ({ navigation }: Props) => {
         setIbanError('Please enter a valid IBAN');
         return;
       }
-      addTransaction(amount, { name: name.trim(), iban: iban.trim() });
+      addTransaction(amount, { name: name.trim(), iban });
     } else if (selectedBeneficiary) {
       addTransaction(amount, {
         name: selectedBeneficiary.name,
