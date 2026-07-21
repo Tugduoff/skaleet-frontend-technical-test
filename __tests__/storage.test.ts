@@ -7,11 +7,11 @@ const state = {
   transactions: [
     {
       id: 1,
-      amount: 42.5,
+      amountCents: 4250,
       account: { name: 'John Doe', iban: 'GB29NWBK60161331926819' },
     },
   ],
-  balance: 957.5,
+  balanceCents: 95750,
   beneficiaries: [{ id: 2, name: 'John Doe', iban: 'GB29NWBK60161331926819' }],
 };
 
@@ -26,7 +26,7 @@ describe('storage', () => {
 
   it('round-trips the state with a version field', async () => {
     await saveState(state);
-    expect(await loadState()).toEqual({ version: 1, ...state });
+    expect(await loadState()).toEqual({ version: 2, ...state });
   });
 
   it('returns null for a payload with a different version', async () => {
@@ -43,7 +43,7 @@ describe('storage', () => {
   });
 
   it('returns null when stored fields are missing', async () => {
-    await AsyncStorage.setItem('app-state', JSON.stringify({ version: 1 }));
+    await AsyncStorage.setItem('app-state', JSON.stringify({ version: 2 }));
     expect(await loadState()).toBeNull();
   });
 
@@ -51,9 +51,9 @@ describe('storage', () => {
     await AsyncStorage.setItem(
       'app-state',
       JSON.stringify({
-        version: 1,
+        version: 2,
         transactions: {},
-        balance: 'lots',
+        balanceCents: 'lots',
         beneficiaries: [],
       }),
     );

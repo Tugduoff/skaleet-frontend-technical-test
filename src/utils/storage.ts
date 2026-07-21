@@ -3,12 +3,13 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import type { Beneficiary, Transaction } from '../types';
 
 const STORAGE_KEY = 'app-state';
-const STORAGE_VERSION = 1;
+const STORAGE_VERSION = 2;
 
 export interface PersistedState {
   version: number;
   transactions: Transaction[];
-  balance: number;
+  /** Integer cents. */
+  balanceCents: number;
   beneficiaries: Beneficiary[];
 }
 
@@ -20,7 +21,7 @@ const isPersistedState = (parsed: unknown): parsed is PersistedState => {
   return (
     state.version === STORAGE_VERSION &&
     Array.isArray(state.transactions) &&
-    typeof state.balance === 'number' &&
+    typeof state.balanceCents === 'number' &&
     Array.isArray(state.beneficiaries)
   );
 };
