@@ -1,6 +1,7 @@
 import React from 'react';
 import renderer, { act } from 'react-test-renderer';
-import { describe, expect, it } from '@jest/globals';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { beforeEach, describe, expect, it } from '@jest/globals';
 
 import {
   TransactionProvider,
@@ -16,8 +17,8 @@ const Probe = () => {
   return null;
 };
 
-const renderProvider = () => {
-  act(() => {
+const renderProvider = async () => {
+  await act(async () => {
     renderer.create(
       <TransactionProvider>
         <Probe />
@@ -27,13 +28,18 @@ const renderProvider = () => {
 };
 
 describe('beneficiaries state', () => {
-  it('starts empty', () => {
-    renderProvider();
+  // The provider persists on every change; start each test from empty storage.
+  beforeEach(async () => {
+    await AsyncStorage.clear();
+  });
+
+  it('starts empty', async () => {
+    await renderProvider();
     expect(context.beneficiaries).toEqual([]);
   });
 
-  it('adds a beneficiary with a generated id', () => {
-    renderProvider();
+  it('adds a beneficiary with a generated id', async () => {
+    await renderProvider();
     act(() => {
       context.addBeneficiary('John Doe', VALID_IBAN);
     });
@@ -45,8 +51,8 @@ describe('beneficiaries state', () => {
     });
   });
 
-  it('appends without replacing existing beneficiaries', () => {
-    renderProvider();
+  it('appends without replacing existing beneficiaries', async () => {
+    await renderProvider();
     act(() => {
       context.addBeneficiary('John Doe', VALID_IBAN);
       context.addBeneficiary('Jane Doe', 'DE89370400440532013000');
@@ -56,8 +62,8 @@ describe('beneficiaries state', () => {
     expect(context.beneficiaries[0].id).not.toBe(context.beneficiaries[1].id);
   });
 
-  it('stores the IBAN normalized', () => {
-    renderProvider();
+  it('stores the IBAN normalized', async () => {
+    await renderProvider();
     act(() => {
       context.addBeneficiary('John Doe', 'gb29 nwbk 6016 1331 9268 19');
     });
@@ -68,8 +74,8 @@ describe('beneficiaries state', () => {
     [VALID_IBAN, 'exact duplicate'],
     ['gb29nwbk60161331926819', 'same IBAN without spaces, lowercase'],
     ['GB29NWBK60161331926819', 'same IBAN without spaces'],
-  ])('ignores a duplicate IBAN (%s)', duplicateIban => {
-    renderProvider();
+  ])('ignores a duplicate IBAN (%s)', async duplicateIban => {
+    await renderProvider();
     act(() => {
       context.addBeneficiary('John Doe', VALID_IBAN);
       context.addBeneficiary('Johnny Doe', duplicateIban);

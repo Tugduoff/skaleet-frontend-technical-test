@@ -2,11 +2,13 @@ import React, {
   createContext,
   useState,
   useContext,
+  useEffect,
   useRef,
   ReactNode,
 } from 'react';
 
 import { normalizeIban } from './utils/iban';
+import { loadState, saveState } from './utils/storage';
 import type { Account, Beneficiary, Transaction } from './types';
 
 interface TransactionContextValue {
@@ -15,6 +17,7 @@ interface TransactionContextValue {
   addTransaction: (amount: string, account: Account) => void;
   beneficiaries: Beneficiary[];
   addBeneficiary: (name: string, iban: string) => void;
+  isLoading: boolean;
 }
 
 const TransactionContext = createContext<TransactionContextValue | undefined>(
@@ -35,6 +38,33 @@ export const TransactionProvider = ({ children }: { children: ReactNode }) => {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [balance, setBalance] = useState(1000);
   const [beneficiaries, setBeneficiaries] = useState<Beneficiary[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Load the persisted state once, then save on every change (skipping the
+  // initial load so stored data is not overwritten before it is read).
+  useEffect(() => {
+    let cancelled = false;
+    loadState().then(state => {
+      if (cancelled) {
+        return;
+      }
+      if (state) {
+        setTransactions(state.transactions);
+        setBalance(state.balance);
+        setBeneficiaries(state.beneficiaries);
+      }
+      setIsLoading(false);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!isLoading) {
+      saveState({ transactions, balance, beneficiaries });
+    }
+  }, [transactions, balance, beneficiaries, isLoading]);
 
   // Monotonic ids: Date.now() can repeat within the same millisecond.
   const lastId = useRef(0);
@@ -77,6 +107,7 @@ export const TransactionProvider = ({ children }: { children: ReactNode }) => {
         balance,
         beneficiaries,
         addBeneficiary,
+        isLoading,
       }}>
       {children}
     </TransactionContext.Provider>
