@@ -9,7 +9,7 @@ import {
 } from 'react-native';
 
 import { useTransactions } from './TransactionContext';
-import { isValidIban } from './utils/iban';
+import { isValidIban, normalizeIban } from './utils/iban';
 import type { Beneficiary } from './types';
 
 const BeneficiariesScreen = () => {
@@ -28,6 +28,13 @@ const BeneficiariesScreen = () => {
     }
     if (!isValidIban(iban)) {
       setIbanError('Please enter a valid IBAN');
+      return;
+    }
+    const isDuplicate = beneficiaries.some(
+      beneficiary => normalizeIban(beneficiary.iban) === normalizeIban(iban),
+    );
+    if (isDuplicate) {
+      setIbanError('This beneficiary already exists');
       return;
     }
     addBeneficiary(name.trim(), iban.trim());

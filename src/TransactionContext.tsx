@@ -1,5 +1,6 @@
 import React, { createContext, useState, useContext, ReactNode } from 'react';
 
+import { normalizeIban } from './utils/iban';
 import type { Account, Beneficiary, Transaction } from './types';
 
 interface TransactionContextValue {
@@ -40,10 +41,15 @@ export const TransactionProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const addBeneficiary = (name: string, iban: string) => {
-    setBeneficiaries(prevBeneficiaries => [
-      ...prevBeneficiaries,
-      { id: Date.now(), name, iban },
-    ]);
+    setBeneficiaries(prevBeneficiaries => {
+      const isDuplicate = prevBeneficiaries.some(
+        beneficiary => normalizeIban(beneficiary.iban) === normalizeIban(iban),
+      );
+      if (isDuplicate) {
+        return prevBeneficiaries;
+      }
+      return [...prevBeneficiaries, { id: Date.now(), name, iban }];
+    });
   };
 
   return (

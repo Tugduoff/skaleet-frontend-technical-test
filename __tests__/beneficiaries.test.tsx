@@ -49,9 +49,22 @@ describe('beneficiaries state', () => {
     renderProvider();
     act(() => {
       context.addBeneficiary('John Doe', VALID_IBAN);
-      context.addBeneficiary('Jane Doe', VALID_IBAN);
+      context.addBeneficiary('Jane Doe', 'DE89370400440532013000');
     });
     expect(context.beneficiaries).toHaveLength(2);
     expect(context.beneficiaries[1].name).toBe('Jane Doe');
+  });
+
+  it.each([
+    [VALID_IBAN, 'exact duplicate'],
+    ['gb29nwbk60161331926819', 'same IBAN without spaces, lowercase'],
+    ['GB29NWBK60161331926819', 'same IBAN without spaces'],
+  ])('ignores a duplicate IBAN (%s)', duplicateIban => {
+    renderProvider();
+    act(() => {
+      context.addBeneficiary('John Doe', VALID_IBAN);
+      context.addBeneficiary('Johnny Doe', duplicateIban);
+    });
+    expect(context.beneficiaries).toHaveLength(1);
   });
 });
