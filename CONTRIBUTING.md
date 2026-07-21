@@ -29,7 +29,20 @@ npm run prettier       # check formatting
 npm run prettier-format # format everything in place
 ```
 
-Git hooks (husky + lint-staged): pre-commit runs eslint --fix and prettier on staged files, pre-push runs the test suite. CI (GitHub Actions) checks formatting, runs lint, typecheck, tests and a prod-dependency audit on every PR and on main, and builds the Android debug APK. Dependabot opens weekly grouped npm and GitHub Actions update PRs.
+Git hooks (husky + lint-staged): pre-commit runs eslint --fix and prettier on staged files, pre-push runs the test suite. CI (GitHub Actions) checks formatting, runs lint, typecheck, tests (with coverage thresholds) and a prod-dependency audit on every PR and on main, and builds the Android debug APK. Dependabot opens weekly grouped npm and GitHub Actions update PRs.
+
+## E2E tests (Maestro)
+
+Smoke flow in `maestro/transaction-flow.yaml`: creates a beneficiary, makes a transaction with them, restarts the app, and asserts the balance and history persisted.
+
+```sh
+# one-time install
+curl -fsSL "https://get.maestro.mobile.dev" | bash
+
+# needs a running emulator/simulator with the app installed
+npm run android         # builds and installs on the running Android emulator
+npm run test:e2e        # runs the Maestro flow
+```
 
 ## Commit messages
 
