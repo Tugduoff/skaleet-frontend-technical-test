@@ -53,6 +53,7 @@ describe('beneficiaries state', () => {
     });
     expect(context.beneficiaries).toHaveLength(2);
     expect(context.beneficiaries[1].name).toBe('Jane Doe');
+    expect(context.beneficiaries[0].id).not.toBe(context.beneficiaries[1].id);
   });
 
   it.each([
