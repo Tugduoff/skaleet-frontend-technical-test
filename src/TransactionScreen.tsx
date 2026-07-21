@@ -17,6 +17,8 @@ const TransactionScreen = ({ navigation }: Props) => {
   const { addTransaction, balance } = useTransactions();
 
   const handleTransaction = () => {
+    setAmountError('');
+    setIbanError('');
     const amountErrorMessage = getAmountError(amount, balance);
     if (amountErrorMessage) {
       setAmountError(amountErrorMessage);
@@ -26,8 +28,6 @@ const TransactionScreen = ({ navigation }: Props) => {
       setIbanError('Please enter a valid IBAN');
       return;
     }
-    setAmountError('');
-    setIbanError('');
     const accountDetails = { name, iban };
     addTransaction(amount, accountDetails);
     navigation.goBack();
