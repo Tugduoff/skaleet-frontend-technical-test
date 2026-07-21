@@ -9,7 +9,8 @@ export interface Beneficiary extends Account {
 
 export interface Transaction {
   id: number;
-  amount: number;
+  /** Integer cents, e.g. 1050 for 10.50. */
+  amountCents: number;
   account: Account;
 }
 

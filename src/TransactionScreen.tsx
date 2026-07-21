@@ -1,11 +1,11 @@
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { View, Text, TextInput, Button } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import { useTransactions } from './TransactionContext';
 import { getAmountError } from './utils/amount';
 import { isValidIban } from './utils/iban';
 import { getSelectedBeneficiary } from './utils/beneficiaries';
-import type { RootStackParamList } from './types';
+import type { Account, RootStackParamList } from './types';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Transaction'>;
@@ -18,7 +18,9 @@ const TransactionScreen = ({ navigation }: Props) => {
   const [amountError, setAmountError] = useState('');
   const [nameError, setNameError] = useState('');
   const [ibanError, setIbanError] = useState('');
-  const { addTransaction, balance, beneficiaries } = useTransactions();
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const submittingRef = useRef(false);
+  const { addTransaction, balanceCents, beneficiaries } = useTransactions();
 
   const useManualEntry = selection === 'manual' || beneficiaries.length === 0;
   const selectedBeneficiary = getSelectedBeneficiary(
@@ -27,14 +29,18 @@ const TransactionScreen = ({ navigation }: Props) => {
   );
 
   const handleTransaction = () => {
+    if (submittingRef.current || isSubmitting) {
+      return;
+    }
     setAmountError('');
     setNameError('');
     setIbanError('');
-    const amountErrorMessage = getAmountError(amount, balance);
+    const amountErrorMessage = getAmountError(amount, balanceCents);
     if (amountErrorMessage) {
       setAmountError(amountErrorMessage);
       return;
     }
+    let account: Account | null = null;
     if (useManualEntry) {
       if (name.trim() === '') {
         setNameError('Please enter a name');
@@ -44,12 +50,23 @@ const TransactionScreen = ({ navigation }: Props) => {
         setIbanError('Please enter a valid IBAN');
         return;
       }
-      addTransaction(amount, { name: name.trim(), iban });
+      account = { name: name.trim(), iban };
     } else if (selectedBeneficiary) {
-      addTransaction(amount, {
+      account = {
         name: selectedBeneficiary.name,
         iban: selectedBeneficiary.iban,
-      });
+      };
+    }
+    if (!account) {
+      return;
+    }
+    submittingRef.current = true;
+    setIsSubmitting(true);
+    if (!addTransaction(amount, account)) {
+      submittingRef.current = false;
+      setAmountError('Transaction could not be completed, please try again');
+      setIsSubmitting(false);
+      return;
     }
     navigation.goBack();
   };
@@ -126,7 +143,11 @@ const TransactionScreen = ({ navigation }: Props) => {
           ) : null}
         </>
       )}
-      <Button title="Submit Transaction" onPress={handleTransaction} />
+      <Button
+        title="Submit Transaction"
+        onPress={handleTransaction}
+        disabled={isSubmitting}
+      />
     </View>
   );
 };

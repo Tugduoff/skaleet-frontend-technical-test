@@ -3,15 +3,46 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import type { Beneficiary, Transaction } from '../types';
 
 const STORAGE_KEY = 'app-state';
-const STORAGE_VERSION = 1;
+const STORAGE_VERSION = 2;
 
 export interface PersistedState {
   version: number;
   transactions: Transaction[];
-  balance: number;
+  /** Integer cents. */
+  balanceCents: number;
   beneficiaries: Beneficiary[];
 }
 
+/** Returns true when value is a non-negative safe integer. */
+const isNonNegativeSafeInteger = (value: unknown): value is number =>
+  typeof value === 'number' &&
+  Number.isInteger(value) &&
+  value >= 0 &&
+  value <= Number.MAX_SAFE_INTEGER;
+
+/** Type guard validating the persisted shape of a Transaction record. */
+const isValidTransaction = (value: unknown): value is Transaction => {
+  if (typeof value !== 'object' || value === null) {
+    return false;
+  }
+  const tx = value as Record<string, unknown>;
+  const account = tx.account;
+  if (typeof account !== 'object' || account === null) {
+    return false;
+  }
+  const ac = account as Record<string, unknown>;
+  return (
+    typeof tx.id === 'number' &&
+    isNonNegativeSafeInteger(tx.amountCents) &&
+    typeof ac.name === 'string' &&
+    typeof ac.iban === 'string'
+  );
+};
+
+/**
+ * Type guard validating the persisted state object. Also defends against
+ * corrupted numeric values that would break the integer-cents invariant.
+ */
 const isPersistedState = (parsed: unknown): parsed is PersistedState => {
   if (typeof parsed !== 'object' || parsed === null) {
     return false;
@@ -20,7 +51,8 @@ const isPersistedState = (parsed: unknown): parsed is PersistedState => {
   return (
     state.version === STORAGE_VERSION &&
     Array.isArray(state.transactions) &&
-    typeof state.balance === 'number' &&
+    state.transactions.every(isValidTransaction) &&
+    isNonNegativeSafeInteger(state.balanceCents) &&
     Array.isArray(state.beneficiaries)
   );
 };

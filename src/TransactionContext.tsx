@@ -7,14 +7,20 @@ import React, {
   ReactNode,
 } from 'react';
 
+import { parseAmountToCents } from './utils/amount';
 import { normalizeIban } from './utils/iban';
 import { loadState, saveState } from './utils/storage';
 import type { Account, Beneficiary, Transaction } from './types';
 
 interface TransactionContextValue {
   transactions: Transaction[];
-  balance: number;
-  addTransaction: (amount: string, account: Account) => void;
+  /** Current balance in integer cents. */
+  balanceCents: number;
+  /**
+   * Validates and applies a transaction. Returns false and changes nothing
+   * when the amount is invalid or would overdraw the balance.
+   */
+  addTransaction: (amount: string, account: Account) => boolean;
   beneficiaries: Beneficiary[];
   addBeneficiary: (name: string, iban: string) => void;
   isLoading: boolean;
@@ -34,14 +40,16 @@ export const useTransactions = () => {
   return context;
 };
 
+export const INITIAL_BALANCE_CENTS = 100_000; // 1000.00
+
 export const TransactionProvider = ({ children }: { children: ReactNode }) => {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
-  const [balance, setBalance] = useState(1000);
+  const [balanceCents, setBalanceCents] = useState(INITIAL_BALANCE_CENTS);
   const [beneficiaries, setBeneficiaries] = useState<Beneficiary[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Load the persisted state once, then save on every change (skipping the
-  // initial load so stored data is not overwritten before it is read).
+  const balanceRef = useRef(INITIAL_BALANCE_CENTS);
+
   useEffect(() => {
     let cancelled = false;
     loadState().then(state => {
@@ -50,7 +58,8 @@ export const TransactionProvider = ({ children }: { children: ReactNode }) => {
       }
       if (state) {
         setTransactions(state.transactions);
-        setBalance(state.balance);
+        balanceRef.current = state.balanceCents;
+        setBalanceCents(state.balanceCents);
         setBeneficiaries(state.beneficiaries);
       }
       setIsLoading(false);
@@ -62,25 +71,36 @@ export const TransactionProvider = ({ children }: { children: ReactNode }) => {
 
   useEffect(() => {
     if (!isLoading) {
-      saveState({ transactions, balance, beneficiaries });
+      saveState({ transactions, balanceCents, beneficiaries });
     }
-  }, [transactions, balance, beneficiaries, isLoading]);
+  }, [transactions, balanceCents, beneficiaries, isLoading]);
 
-  // Monotonic ids: Date.now() can repeat within the same millisecond.
   const lastId = useRef(0);
   const nextId = () => {
     lastId.current = Math.max(Date.now(), lastId.current + 1);
     return lastId.current;
   };
 
-  const addTransaction = (amount: string, account: Account) => {
-    const newTransaction = {
-      id: nextId(),
-      amount: parseFloat(amount),
-      account: { ...account, iban: normalizeIban(account.iban) },
-    };
-    setTransactions(prevTransactions => [...prevTransactions, newTransaction]);
-    setBalance(prevBalance => prevBalance - parseFloat(amount));
+  const addTransaction = (amount: string, account: Account): boolean => {
+    const amountCents = parseAmountToCents(amount);
+    if (
+      amountCents === null ||
+      amountCents <= 0 ||
+      amountCents > balanceRef.current
+    ) {
+      return false;
+    }
+    balanceRef.current -= amountCents;
+    setBalanceCents(balanceRef.current);
+    setTransactions(prevTransactions => [
+      ...prevTransactions,
+      {
+        id: nextId(),
+        amountCents,
+        account: { ...account, iban: normalizeIban(account.iban) },
+      },
+    ]);
+    return true;
   };
 
   const addBeneficiary = (name: string, iban: string) => {
@@ -104,7 +124,7 @@ export const TransactionProvider = ({ children }: { children: ReactNode }) => {
       value={{
         transactions,
         addTransaction,
-        balance,
+        balanceCents,
         beneficiaries,
         addBeneficiary,
         isLoading,
