@@ -9,5 +9,6 @@
 ## Checklist
 
 - [ ] `npm run lint` passes
+- [ ] `npm run typecheck` passes
 - [ ] `npm test` passes
 - [ ] Tested on device/simulator (iOS and/or Android)
