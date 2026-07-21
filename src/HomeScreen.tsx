@@ -2,11 +2,15 @@ import React from 'react';
 import { View, Text, Button, FlatList, StyleSheet } from 'react-native';
 
 import { useTransactions } from './TransactionContext';
+import type { RootStackParamList, Transaction } from './types';
+import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 
-const HomeScreen = ({ navigation }) => {
+type Props = NativeStackScreenProps<RootStackParamList, 'Home'>;
+
+const HomeScreen = ({ navigation }: Props) => {
   const { transactions, balance } = useTransactions();
 
-  const renderItem = ({ item }) => (
+  const renderItem = ({ item }: { item: Transaction }) => (
     <View style={styles.item}>
       <Text style={styles.itemText}>Transaction ID: {item.id}</Text>
       <Text style={styles.itemText}>Amount: ${item.amount.toFixed(2)}</Text>

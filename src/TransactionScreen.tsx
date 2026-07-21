@@ -1,8 +1,12 @@
 import React, { useState } from 'react';
 import { View, TextInput, Button } from 'react-native';
 import { useTransactions } from './TransactionContext';
+import type { RootStackParamList } from './types';
+import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 
-const TransactionScreen = ({ navigation }) => {
+type Props = NativeStackScreenProps<RootStackParamList, 'Transaction'>;
+
+const TransactionScreen = ({ navigation }: Props) => {
   const [amount, setAmount] = useState('');
   const [name, setName] = useState('');
   const [iban, setIban] = useState('');
