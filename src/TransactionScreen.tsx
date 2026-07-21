@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, TextInput, Button } from 'react-native';
 import { useTransactions } from './TransactionContext';
 import { isValidIban } from './utils/iban';
+import { getAmountError } from './utils/amount';
 import type { RootStackParamList } from './types';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 
@@ -11,15 +12,22 @@ const TransactionScreen = ({ navigation }: Props) => {
   const [amount, setAmount] = useState('');
   const [name, setName] = useState('');
   const [iban, setIban] = useState('');
+  const [amountError, setAmountError] = useState('');
   const [ibanError, setIbanError] = useState('');
-  const { addTransaction } = useTransactions();
+  const { addTransaction, balance } = useTransactions();
 
   const handleTransaction = () => {
+    setAmountError('');
+    setIbanError('');
+    const amountErrorMessage = getAmountError(amount, balance);
+    if (amountErrorMessage) {
+      setAmountError(amountErrorMessage);
+      return;
+    }
     if (!isValidIban(iban)) {
       setIbanError('Please enter a valid IBAN');
       return;
     }
-    setIbanError('');
     const accountDetails = { name, iban };
     addTransaction(amount, accountDetails);
     navigation.goBack();
@@ -40,6 +48,9 @@ const TransactionScreen = ({ navigation }: Props) => {
         keyboardType="numeric"
         placeholder="Enter amount"
       />
+      {amountError ? (
+        <Text style={{ color: 'red', marginBottom: 8 }}>{amountError}</Text>
+      ) : null}
       <TextInput
         style={{
           height: 40,
