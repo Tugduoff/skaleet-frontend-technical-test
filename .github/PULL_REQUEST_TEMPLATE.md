@@ -1,5 +1,7 @@
 ## Summary
 
+Closes #<!-- issue id -->
+
 <!-- What changed and why -->
 
 ## How to test
