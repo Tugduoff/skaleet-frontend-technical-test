@@ -5,6 +5,7 @@ Personal notes on how this repo is set up and how I work on it.
 ## Launching the project
 
 ```sh
+nvm use            # optional, .nvmrc pins the Node version
 npm install
 npm start          # Metro bundler, keep running in its own terminal
 npm run android     # in another terminal
@@ -23,10 +24,11 @@ Other commands:
 ```sh
 npm test              # jest
 npm run lint           # eslint
+npm run typecheck      # tsc --noEmit
 npm run prettier-format # format everything in place
 ```
 
-A pre-commit hook (husky + lint-staged) runs eslint --fix and prettier on staged files automatically.
+Git hooks (husky + lint-staged): pre-commit runs eslint --fix and prettier on staged files, pre-push runs the test suite. CI (GitHub Actions) runs lint, typecheck and tests on every PR and on main.
 
 ## Commit messages
 
@@ -47,4 +49,4 @@ Keep messages in the imperative mood ("add x", not "added x"), one logical chang
 - One feature/fix per branch and per PR, branch name `type/short-description` (e.g. `feat/beneficiary-creation`).
 - PR description: what changed and why, plus how to test it.
 - Keep PRs small enough to review in one pass; split unrelated changes into separate PRs.
-- Lint, tests and the pre-commit hook must pass before requesting review.
+- Lint, typecheck, tests and the pre-commit hook must pass before requesting review (CI enforces this).
