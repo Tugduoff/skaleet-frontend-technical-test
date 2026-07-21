@@ -41,7 +41,7 @@ describe('beneficiaries state', () => {
     expect(context.beneficiaries[0]).toEqual({
       id: expect.any(Number),
       name: 'John Doe',
-      iban: VALID_IBAN,
+      iban: 'GB29NWBK60161331926819',
     });
   });
 
@@ -54,6 +54,14 @@ describe('beneficiaries state', () => {
     expect(context.beneficiaries).toHaveLength(2);
     expect(context.beneficiaries[1].name).toBe('Jane Doe');
     expect(context.beneficiaries[0].id).not.toBe(context.beneficiaries[1].id);
+  });
+
+  it('stores the IBAN normalized', () => {
+    renderProvider();
+    act(() => {
+      context.addBeneficiary('John Doe', 'gb29 nwbk 6016 1331 9268 19');
+    });
+    expect(context.beneficiaries[0].iban).toBe('GB29NWBK60161331926819');
   });
 
   it.each([

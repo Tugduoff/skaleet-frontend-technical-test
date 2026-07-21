@@ -37,7 +37,7 @@ const BeneficiariesScreen = () => {
       setIbanError('This beneficiary already exists');
       return;
     }
-    addBeneficiary(name.trim(), iban.trim());
+    addBeneficiary(name.trim(), iban);
     setName('');
     setIban('');
   };
