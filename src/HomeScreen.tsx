@@ -32,6 +32,10 @@ const HomeScreen = ({ navigation }: Props) => {
         title="Add Transaction"
         onPress={() => navigation.navigate('Transaction')}
       />
+      <Button
+        title="Beneficiaries"
+        onPress={() => navigation.navigate('Beneficiaries')}
+      />
       <FlatList
         data={transactions}
         keyExtractor={item => item.id.toString()}

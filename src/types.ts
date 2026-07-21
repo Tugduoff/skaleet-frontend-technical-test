@@ -3,6 +3,10 @@ export interface Account {
   iban: string;
 }
 
+export interface Beneficiary extends Account {
+  id: number;
+}
+
 export interface Transaction {
   id: number;
   amount: number;
@@ -12,4 +16,5 @@ export interface Transaction {
 export type RootStackParamList = {
   Home: undefined;
   Transaction: undefined;
+  Beneficiaries: undefined;
 };

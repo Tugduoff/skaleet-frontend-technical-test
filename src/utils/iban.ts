@@ -1,10 +1,14 @@
+/** Normalizes an IBAN for comparison: strips spaces, uppercases. */
+export const normalizeIban = (iban: string): string =>
+  iban.replace(/\s+/g, '').toUpperCase();
+
 /**
  * Validates an IBAN using the ISO 13616 mod-97 checksum.
  * Accepts both electronic (no spaces) and printable (spaces) formats,
  * case-insensitively.
  */
 export const isValidIban = (iban: string): boolean => {
-  const normalized = iban.replace(/\s+/g, '').toUpperCase();
+  const normalized = normalizeIban(iban);
 
   // 2-letter country code, 2 check digits, then an 11-30 char BBAN.
   if (!/^[A-Z]{2}\d{2}[A-Z0-9]{11,30}$/.test(normalized)) {
