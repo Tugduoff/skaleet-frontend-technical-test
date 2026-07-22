@@ -40,6 +40,11 @@ describe('HomeScreen', () => {
     expect(await screen.findByText('Current Balance: $1000.00')).toBeTruthy();
   });
 
+  it('shows an empty state when there are no transactions', async () => {
+    await renderScreen();
+    expect(await screen.findByText('No transactions yet')).toBeTruthy();
+  });
+
   it('renders persisted transactions', async () => {
     await AsyncStorage.setItem(
       'app-state',

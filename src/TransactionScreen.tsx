@@ -1,9 +1,10 @@
 import React from 'react';
-import { View, Text, TextInput, Button, StyleSheet } from 'react-native';
+import { View, Text, TextInput, Button, StyleSheet, Alert } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 
 import { useTransactionScreen } from './hooks/useTransactionScreen';
-import { getBeneficiaryFullName } from './utils/beneficiaries';
+import { getBeneficiaryFullName, splitFullName } from './utils/beneficiaries';
+import { normalizeIban } from './utils/iban';
 import type { RootStackParamList } from './types';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 
@@ -29,9 +30,34 @@ const TransactionScreen = ({ navigation }: Props) => {
   } = useTransactionScreen();
 
   const handleTransaction = () => {
-    if (submit()) {
-      navigation.goBack();
+    if (!submit()) {
+      return;
     }
+    const recipientSaved = beneficiaries.some(
+      beneficiary => beneficiary.iban === normalizeIban(iban),
+    );
+    if (!useManualEntry || recipientSaved) {
+      navigation.goBack();
+      return;
+    }
+    // Manual recipient not yet saved: offer to reuse it next time.
+    const { firstName, lastName } = splitFullName(name);
+    Alert.alert('Save recipient', `Add ${name.trim()} to your beneficiaries?`, [
+      {
+        text: 'No thanks',
+        style: 'cancel',
+        onPress: () => navigation.goBack(),
+      },
+      {
+        text: 'Save',
+        onPress: () =>
+          navigation.replace('BeneficiaryForm', {
+            prefillFirstName: firstName,
+            prefillLastName: lastName,
+            prefillIban: iban,
+          }),
+      },
+    ]);
   };
 
   return (

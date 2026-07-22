@@ -1,4 +1,5 @@
 import React from 'react';
+import { Alert } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {
   render,
@@ -7,7 +8,14 @@ import {
   userEvent,
   waitFor,
 } from '@testing-library/react-native';
-import { beforeEach, describe, expect, it, jest } from '@jest/globals';
+import {
+  afterEach,
+  beforeEach,
+  describe,
+  expect,
+  it,
+  jest,
+} from '@jest/globals';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 
 import TransactionScreen from '../src/TransactionScreen';
@@ -40,7 +48,7 @@ const seedBeneficiary = () =>
   );
 
 const renderScreen = async () => {
-  const navigation = { goBack: jest.fn() };
+  const navigation = { goBack: jest.fn(), replace: jest.fn() };
   await render(
     <TransactionProvider>
       <TransactionScreen
@@ -56,9 +64,25 @@ const renderScreen = async () => {
   return navigation;
 };
 
+const submitManualTransaction = async (
+  user: ReturnType<typeof userEvent.setup>,
+) => {
+  await user.type(screen.getByPlaceholderText('Enter amount'), '10.50');
+  await user.type(screen.getByPlaceholderText('Recipient Name'), 'John Doe');
+  await user.type(screen.getByPlaceholderText('Recipient IBAN'), VALID_IBAN);
+  await user.press(screen.getByText('Submit Transaction'));
+};
+
 describe('TransactionScreen', () => {
+  let alertSpy: jest.SpiedFunction<typeof Alert.alert>;
+
   beforeEach(async () => {
+    alertSpy = jest.spyOn(Alert, 'alert').mockImplementation(() => undefined);
     await AsyncStorage.clear();
+  });
+
+  afterEach(() => {
+    alertSpy.mockRestore();
   });
 
   it('shows a manual-entry hint when there are no beneficiaries', async () => {
@@ -101,14 +125,38 @@ describe('TransactionScreen', () => {
     expect(await screen.findByText('Please enter a valid IBAN')).toBeTruthy();
   });
 
-  it('submits a manual transaction and navigates back', async () => {
+  it('offers to save a new manual recipient, and leaves on No thanks', async () => {
     const user = userEvent.setup();
     const navigation = await renderScreen();
-    await user.type(screen.getByPlaceholderText('Enter amount'), '10.50');
-    await user.type(screen.getByPlaceholderText('Recipient Name'), 'John Doe');
-    await user.type(screen.getByPlaceholderText('Recipient IBAN'), VALID_IBAN);
-    await user.press(screen.getByText('Submit Transaction'));
-    await waitFor(() => expect(navigation.goBack).toHaveBeenCalledTimes(1));
+    await submitManualTransaction(user);
+    await waitFor(() =>
+      expect(alertSpy).toHaveBeenCalledWith(
+        'Save recipient',
+        'Add John Doe to your beneficiaries?',
+        expect.any(Array),
+      ),
+    );
+    const buttons = alertSpy.mock.calls[0][2];
+    const decline = buttons?.find(button => button.text === 'No thanks');
+    decline?.onPress?.();
+    expect(navigation.goBack).toHaveBeenCalledTimes(1);
+    expect(navigation.replace).not.toHaveBeenCalled();
+  });
+
+  it('opens the prefilled beneficiary form on Save', async () => {
+    const user = userEvent.setup();
+    const navigation = await renderScreen();
+    await submitManualTransaction(user);
+    await waitFor(() => expect(alertSpy).toHaveBeenCalled());
+    const buttons = alertSpy.mock.calls[0][2];
+    const save = buttons?.find(button => button.text === 'Save');
+    save?.onPress?.();
+    expect(navigation.replace).toHaveBeenCalledWith('BeneficiaryForm', {
+      prefillFirstName: 'John',
+      prefillLastName: 'Doe',
+      prefillIban: VALID_IBAN,
+    });
+    expect(navigation.goBack).not.toHaveBeenCalled();
   });
 
   it('shows the picker when beneficiaries exist and submits for the default selection', async () => {
@@ -121,6 +169,8 @@ describe('TransactionScreen', () => {
     await user.type(screen.getByPlaceholderText('Enter amount'), '10');
     await user.press(screen.getByText('Submit Transaction'));
     await waitFor(() => expect(navigation.goBack).toHaveBeenCalledTimes(1));
+    // A known recipient is not offered to be saved again.
+    expect(alertSpy).not.toHaveBeenCalled();
   });
 
   it('reveals manual entry when the picker is switched to manual', async () => {

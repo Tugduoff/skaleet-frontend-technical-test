@@ -42,6 +42,9 @@ const HomeScreen = ({ navigation }: Props) => {
         data={transactions}
         keyExtractor={item => item.id.toString()}
         renderItem={renderItem}
+        ListEmptyComponent={
+          <Text style={styles.emptyText}>No transactions yet</Text>
+        }
         contentContainerStyle={styles.listContainer}
       />
     </View>
@@ -75,6 +78,10 @@ const styles = StyleSheet.create({
   listContainer: {
     flexGrow: 1,
     width: '100%',
+  },
+  emptyText: {
+    textAlign: 'center',
+    color: '#666',
   },
 });
 
