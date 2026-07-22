@@ -11,6 +11,7 @@ import BeneficiariesScreen from './BeneficiariesScreen';
 import BeneficiaryFormScreen from './BeneficiaryFormScreen';
 import { ErrorBoundary } from './ErrorBoundary';
 import { TransactionProvider, useTransactions } from './TransactionContext';
+import { t } from './i18n';
 import type { RootStackParamList } from './types';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -29,17 +30,29 @@ const AppContent = () => {
   return (
     <NavigationContainer>
       <Stack.Navigator>
-        <Stack.Screen name="Home" component={HomeScreen} />
-        <Stack.Screen name="Transaction" component={TransactionScreen} />
-        <Stack.Screen name="Beneficiaries" component={BeneficiariesScreen} />
+        <Stack.Screen
+          name="Home"
+          component={HomeScreen}
+          options={{ title: t('screens.home') }}
+        />
+        <Stack.Screen
+          name="Transaction"
+          component={TransactionScreen}
+          options={{ title: t('screens.transaction') }}
+        />
+        <Stack.Screen
+          name="Beneficiaries"
+          component={BeneficiariesScreen}
+          options={{ title: t('screens.beneficiaries') }}
+        />
         <Stack.Screen
           name="BeneficiaryForm"
           component={BeneficiaryFormScreen}
           options={({ route }) => ({
             title:
               route.params?.beneficiaryId !== undefined
-                ? 'Edit Beneficiary'
-                : 'Add Beneficiary',
+                ? t('screens.editBeneficiary')
+                : t('screens.addBeneficiary'),
           })}
         />
       </Stack.Navigator>

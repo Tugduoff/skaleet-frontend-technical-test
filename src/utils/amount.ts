@@ -1,3 +1,5 @@
+import { deviceLocale, t } from '../i18n';
+
 /**
  * Parses a user-entered amount into integer cents.
  *
@@ -25,20 +27,30 @@ export const getAmountError = (
   balanceCents: number,
 ): string | null => {
   if (amount.trim() === '') {
-    return 'Please enter an amount';
+    return t('errors.amountRequired');
   }
   const cents = parseAmountToCents(amount);
   if (cents === null) {
-    return 'Please enter a valid amount';
+    return t('errors.amountInvalid');
   }
   if (cents <= 0) {
-    return 'Amount must be greater than 0';
+    return t('errors.amountPositive');
   }
   if (cents > balanceCents) {
-    return 'Amount exceeds current balance';
+    return t('errors.amountExceeds');
   }
   return null;
 };
 
-/** Formats integer cents for display, e.g. 1050 -> "10.50". */
-export const formatAmount = (cents: number): string => (cents / 100).toFixed(2);
+/** ISO 4217 currency used across the app. */
+const CURRENCY = 'EUR';
+
+/**
+ * Formats integer cents as a localized currency string, e.g. 1050 ->
+ * "€10.50" in en-US, "10,50 €" in fr-FR.
+ */
+export const formatAmount = (cents: number): string =>
+  new Intl.NumberFormat(deviceLocale, {
+    style: 'currency',
+    currency: CURRENCY,
+  }).format(cents / 100);

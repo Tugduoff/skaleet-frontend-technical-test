@@ -3,6 +3,7 @@ import { View, Text, Button, FlatList, StyleSheet } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useHomeScreen } from './hooks/useHomeScreen';
+import { t } from './i18n';
 import { formatDate } from './utils/date';
 import type { RootStackParamList, Transaction } from './types';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
@@ -17,36 +18,44 @@ const HomeScreen = ({ navigation }: Props) => {
 
   const renderItem = ({ item }: { item: Transaction }) => (
     <View style={styles.item}>
-      <Text style={styles.itemText}>Transaction ID: {item.id}</Text>
       <Text style={styles.itemText}>
-        Amount: ${formatAmount(item.amountCents)}
+        {t('home.transactionId', { id: String(item.id) })}
       </Text>
-      <Text style={styles.itemText}>To: {item.account.name}</Text>
-      <Text style={styles.itemText}>IBAN: {item.account.iban}</Text>
-      <Text style={styles.itemText}>Date: {formatDate(item.createdAt)}</Text>
+      <Text style={styles.itemText}>
+        {t('home.amount', { amount: formatAmount(item.amountCents) })}
+      </Text>
+      <Text style={styles.itemText}>
+        {t('home.to', { name: item.account.name })}
+      </Text>
+      <Text style={styles.itemText}>
+        {t('home.iban', { iban: item.account.iban })}
+      </Text>
+      <Text style={styles.itemText}>
+        {t('home.date', { date: formatDate(item.createdAt) })}
+      </Text>
     </View>
   );
 
   return (
     <View style={[styles.container, { paddingBottom: insets.bottom }]}>
       <Text style={styles.balanceText}>
-        Current Balance: ${formatAmount(balanceCents)}
+        {t('home.balance', { amount: formatAmount(balanceCents) })}
       </Text>
       <Button
-        title="Add Transaction"
+        title={t('home.addTransaction')}
         onPress={() => navigation.navigate('Transaction')}
       />
       <Button
-        title="Beneficiaries"
+        title={t('home.beneficiaries')}
         onPress={() => navigation.navigate('Beneficiaries')}
       />
-      <Button title="Reset demo data" onPress={confirmReset} />
+      <Button title={t('home.reset')} onPress={confirmReset} />
       <FlatList
         data={transactions}
         keyExtractor={item => item.id.toString()}
         renderItem={renderItem}
         ListEmptyComponent={
-          <Text style={styles.emptyText}>No transactions yet</Text>
+          <Text style={styles.emptyText}>{t('home.empty')}</Text>
         }
         contentContainerStyle={styles.listContainer}
       />

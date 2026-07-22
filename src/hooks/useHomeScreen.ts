@@ -2,6 +2,7 @@ import { useMemo } from 'react';
 import { Alert } from 'react-native';
 
 import { useTransactions } from '../TransactionContext';
+import { t } from '../i18n';
 import { formatAmount } from '../utils/amount';
 
 /**
@@ -22,14 +23,14 @@ export const useHomeScreen = () => {
 
   /** Asks for confirmation, then restores the initial demo state. */
   const confirmReset = () => {
-    Alert.alert(
-      'Reset demo data',
-      'Restore the initial balance and clear all transactions and beneficiaries?',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        { text: 'Reset', style: 'destructive', onPress: resetDemoData },
-      ],
-    );
+    Alert.alert(t('home.resetTitle'), t('home.resetMessage'), [
+      { text: t('common.cancel'), style: 'cancel' },
+      {
+        text: t('home.resetConfirm'),
+        style: 'destructive',
+        onPress: resetDemoData,
+      },
+    ]);
   };
 
   return {

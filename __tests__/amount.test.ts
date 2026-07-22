@@ -63,10 +63,10 @@ describe('getAmountError', () => {
 
 describe('formatAmount', () => {
   it.each([
-    [100000, '1000.00'],
-    [1050, '10.50'],
-    [1, '0.01'],
-    [0, '0.00'],
+    [100000, '€1,000.00'],
+    [1050, '€10.50'],
+    [1, '€0.01'],
+    [0, '€0.00'],
   ])('formats %i cents as %s', (cents, expected) => {
     expect(formatAmount(cents)).toBe(expected);
   });

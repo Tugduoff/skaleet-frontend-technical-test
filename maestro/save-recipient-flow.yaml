@@ -18,7 +18,7 @@ appId: com.skaleetfrontendtechnicaltest
 - tapOn: 'Submit Transaction'
 - assertVisible: 'Add John Doe to your beneficiaries?'
 - tapOn: 'No thanks'
-- assertVisible: 'Current Balance: $990.00'
+- assertVisible: 'Current Balance: €990.00'
 - tapOn: 'Beneficiaries'
 - assertVisible: 'No beneficiaries yet'
 - back
