@@ -1,5 +1,6 @@
 import React from 'react';
 import { View, Text, Button, FlatList, StyleSheet } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useHomeScreen } from './hooks/useHomeScreen';
 import { formatDate } from './utils/date';
@@ -11,6 +12,8 @@ type Props = NativeStackScreenProps<RootStackParamList, 'Home'>;
 const HomeScreen = ({ navigation }: Props) => {
   const { transactions, balanceCents, formatAmount, confirmReset } =
     useHomeScreen();
+  // The stack header covers the top inset; keep content off the gesture bar.
+  const insets = useSafeAreaInsets();
 
   const renderItem = ({ item }: { item: Transaction }) => (
     <View style={styles.item}>
@@ -29,7 +32,7 @@ const HomeScreen = ({ navigation }: Props) => {
   );
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { paddingBottom: insets.bottom }]}>
       <Text style={styles.balanceText}>
         Current Balance: ${formatAmount(balanceCents)}
       </Text>

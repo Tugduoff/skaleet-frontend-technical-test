@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, TextInput, Button, StyleSheet, Alert } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useTransactionScreen } from './hooks/useTransactionScreen';
 import { getBeneficiaryFullName, splitFullName } from './utils/beneficiaries';
@@ -28,6 +29,8 @@ const TransactionScreen = ({ navigation }: Props) => {
     beneficiaries,
     submit,
   } = useTransactionScreen();
+  // The stack header covers the top inset; keep content off the gesture bar.
+  const insets = useSafeAreaInsets();
 
   const handleTransaction = () => {
     if (!submit()) {
@@ -61,7 +64,7 @@ const TransactionScreen = ({ navigation }: Props) => {
   };
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { paddingBottom: insets.bottom }]}>
       <TextInput
         style={styles.input}
         onChangeText={setAmount}

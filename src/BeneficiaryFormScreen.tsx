@@ -1,5 +1,6 @@
 import React from 'react';
 import { View, Text, TextInput, Button, StyleSheet } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useBeneficiaryForm } from './hooks/useBeneficiaryForm';
 import type { RootStackParamList } from './types';
@@ -20,6 +21,8 @@ const BeneficiaryFormScreen = ({ navigation, route }: Props) => {
     ibanError,
     submit,
   } = useBeneficiaryForm(route.params ?? {});
+  // The stack header covers the top inset; keep content off the gesture bar.
+  const insets = useSafeAreaInsets();
 
   const handleSave = () => {
     if (submit()) {
@@ -28,7 +31,7 @@ const BeneficiaryFormScreen = ({ navigation, route }: Props) => {
   };
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { paddingBottom: insets.bottom }]}>
       <TextInput
         style={styles.input}
         onChangeText={setFirstName}
