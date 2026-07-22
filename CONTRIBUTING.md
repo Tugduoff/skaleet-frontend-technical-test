@@ -31,6 +31,33 @@ npm run prettier-format # format everything in place
 
 Git hooks (husky + lint-staged): pre-commit runs eslint --fix and prettier on staged files, pre-push runs the test suite. CI (GitHub Actions) checks formatting, runs lint, typecheck, tests (with coverage thresholds) and a prod-dependency audit on every PR and on main; the Android debug APK build runs on main pushes, on PRs touching native files, and manually (to save CI minutes). Dependabot opens weekly grouped npm and GitHub Actions update PRs.
 
+## Releasing (Android)
+
+Release builds are signed with an upload keystore that is never committed (`*.keystore` is gitignored, `debug.keystore` excepted) and are minified with R8/Proguard.
+
+1. Generate an upload keystore — once, and keep it (and its passwords) safe: losing it means losing the ability to publish updates.
+
+   ```sh
+   keytool -genkeypair -v -storetype PKCS12 -keystore android/app/upload-keystore.keystore -alias upload -keyalg RSA -keysize 2048 -validity 10000
+   ```
+
+2. Provide the credentials as gradle properties — in `~/.gradle/gradle.properties` locally, or injected from CI secrets (never in the repo):
+
+   ```properties
+   MYAPP_UPLOAD_STORE_FILE=upload-keystore.keystore
+   MYAPP_UPLOAD_STORE_PASSWORD=*****
+   MYAPP_UPLOAD_KEY_ALIAS=upload
+   MYAPP_UPLOAD_KEY_PASSWORD=*****
+   ```
+
+3. Build the release APK (or pass the same values as `-P` flags instead of step 2):
+
+   ```sh
+   cd android && ./gradlew assembleRelease
+   ```
+
+Without the `MYAPP_UPLOAD_*` properties the release build fails on purpose — a release is never silently signed with the debug keystore. Keep the R8 mapping file (`android/app/build/outputs/mapping/release/`) for crash deobfuscation.
+
 ## E2E tests (Maestro)
 
 Smoke flow in `maestro/transaction-flow.yaml`: creates a beneficiary, makes a transaction with them, restarts the app, and asserts the balance and history persisted.
