@@ -1,0 +1,41 @@
+appId: com.skaleetfrontendtechnicaltest
+---
+# Save-recipient flow: a manual transaction to an unknown IBAN offers to
+# save the recipient. Declining keeps the list empty; accepting opens the
+# prefilled beneficiary form.
+- launchApp:
+    clearState: true
+- tapOn: 'Add Transaction'
+- tapOn: 'Enter amount'
+- inputText: '10'
+- hideKeyboard
+- tapOn: 'Recipient Name'
+- inputText: 'John Doe'
+- hideKeyboard
+- tapOn: 'Recipient IBAN'
+- inputText: 'GB29 NWBK 6016 1331 9268 19'
+- hideKeyboard
+- tapOn: 'Submit Transaction'
+- assertVisible: 'Add John Doe to your beneficiaries?'
+- tapOn: 'No thanks'
+- assertVisible: 'Current Balance: $990.00'
+- tapOn: 'Beneficiaries'
+- assertVisible: 'No beneficiaries yet'
+- back
+- tapOn: 'Add Transaction'
+- tapOn: 'Enter amount'
+- inputText: '10'
+- hideKeyboard
+- tapOn: 'Recipient Name'
+- inputText: 'John Doe'
+- hideKeyboard
+- tapOn: 'Recipient IBAN'
+- inputText: 'GB29 NWBK 6016 1331 9268 19'
+- hideKeyboard
+- tapOn: 'Submit Transaction'
+- tapOn: 'Save'
+# The prefilled form opens; saving it lands back on Home.
+- tapOn: 'Save Beneficiary'
+- tapOn: 'Beneficiaries'
+- assertVisible: 'John Doe'
+- assertVisible: 'IBAN: GB29NWBK60161331926819'
