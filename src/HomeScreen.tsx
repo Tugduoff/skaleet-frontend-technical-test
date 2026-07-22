@@ -21,12 +21,8 @@ const HomeScreen = ({ navigation }: Props) => {
       <Text style={styles.itemText}>
         Amount: ${formatAmount(item.amountCents)}
       </Text>
-      {item.account && (
-        <>
-          <Text style={styles.itemText}>To: {item.account.name}</Text>
-          <Text style={styles.itemText}>IBAN: {item.account.iban}</Text>
-        </>
-      )}
+      <Text style={styles.itemText}>To: {item.account.name}</Text>
+      <Text style={styles.itemText}>IBAN: {item.account.iban}</Text>
       <Text style={styles.itemText}>Date: {formatDate(item.createdAt)}</Text>
     </View>
   );
