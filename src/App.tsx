@@ -3,11 +3,13 @@ import { ActivityIndicator, View } from 'react-native';
 
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import HomeScreen from './HomeScreen';
 import TransactionScreen from './TransactionScreen';
 import BeneficiariesScreen from './BeneficiariesScreen';
 import BeneficiaryFormScreen from './BeneficiaryFormScreen';
+import { ErrorBoundary } from './ErrorBoundary';
 import { TransactionProvider, useTransactions } from './TransactionContext';
 import type { RootStackParamList } from './types';
 
@@ -47,9 +49,13 @@ const AppContent = () => {
 
 const App = () => {
   return (
-    <TransactionProvider>
-      <AppContent />
-    </TransactionProvider>
+    <SafeAreaProvider>
+      <ErrorBoundary>
+        <TransactionProvider>
+          <AppContent />
+        </TransactionProvider>
+      </ErrorBoundary>
+    </SafeAreaProvider>
   );
 };
 

@@ -1,5 +1,6 @@
 import React from 'react';
 import { View, Text, Button, FlatList, StyleSheet } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useBeneficiariesScreen } from './hooks/useBeneficiariesScreen';
 import { getBeneficiaryFullName } from './utils/beneficiaries';
@@ -10,6 +11,8 @@ type Props = NativeStackScreenProps<RootStackParamList, 'Beneficiaries'>;
 
 const BeneficiariesScreen = ({ navigation }: Props) => {
   const { beneficiaries, confirmDelete } = useBeneficiariesScreen();
+  // The stack header covers the top inset; keep content off the gesture bar.
+  const insets = useSafeAreaInsets();
 
   const renderItem = ({ item }: { item: Beneficiary }) => (
     <View style={styles.item}>
@@ -30,7 +33,7 @@ const BeneficiariesScreen = ({ navigation }: Props) => {
   );
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { paddingBottom: insets.bottom }]}>
       <FlatList
         style={styles.list}
         data={beneficiaries}
