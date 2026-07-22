@@ -5,13 +5,17 @@ appId: com.skaleetfrontendtechnicaltest
 - launchApp:
     clearState: true
 - tapOn: 'Beneficiaries'
-- tapOn: 'Beneficiary name'
-- inputText: 'John Doe'
+- tapOn: 'Add Beneficiary'
+- tapOn: 'First name'
+- inputText: 'John'
 - hideKeyboard
-- tapOn: 'Beneficiary IBAN'
+- tapOn: 'Last name'
+- inputText: 'Doe'
+- hideKeyboard
+- tapOn: 'IBAN'
 - inputText: 'GB29 NWBK 6016 1331 9268 19'
 - hideKeyboard
-- tapOn: 'Add Beneficiary'
+- tapOn: 'Save Beneficiary'
 - assertVisible: 'IBAN: GB29NWBK60161331926819'
 - back
 - tapOn: 'Add Transaction'
