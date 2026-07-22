@@ -29,6 +29,12 @@ interface TransactionContextValue {
   addTransaction: (amount: string, account: Account) => boolean;
   beneficiaries: Beneficiary[];
   addBeneficiary: (input: BeneficiaryInput) => void;
+  /**
+   * Updates an existing beneficiary. Returns false and changes nothing when
+   * another beneficiary already uses the IBAN.
+   */
+  updateBeneficiary: (id: number, input: BeneficiaryInput) => boolean;
+  deleteBeneficiary: (id: number) => void;
   isLoading: boolean;
 }
 
@@ -130,6 +136,36 @@ export const TransactionProvider = ({ children }: { children: ReactNode }) => {
     });
   };
 
+  const updateBeneficiary = (id: number, input: BeneficiaryInput): boolean => {
+    const normalizedIban = normalizeIban(input.iban);
+    const isDuplicate = beneficiaries.some(
+      beneficiary =>
+        beneficiary.id !== id && beneficiary.iban === normalizedIban,
+    );
+    if (isDuplicate) {
+      return false;
+    }
+    setBeneficiaries(prevBeneficiaries =>
+      prevBeneficiaries.map(beneficiary =>
+        beneficiary.id === id
+          ? {
+              ...beneficiary,
+              firstName: input.firstName,
+              lastName: input.lastName,
+              iban: normalizedIban,
+            }
+          : beneficiary,
+      ),
+    );
+    return true;
+  };
+
+  const deleteBeneficiary = (id: number) => {
+    setBeneficiaries(prevBeneficiaries =>
+      prevBeneficiaries.filter(beneficiary => beneficiary.id !== id),
+    );
+  };
+
   return (
     <TransactionContext.Provider
       value={{
@@ -138,6 +174,8 @@ export const TransactionProvider = ({ children }: { children: ReactNode }) => {
         balanceCents,
         beneficiaries,
         addBeneficiary,
+        updateBeneficiary,
+        deleteBeneficiary,
         isLoading,
       }}>
       {children}

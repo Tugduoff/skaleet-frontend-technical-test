@@ -21,4 +21,13 @@ export type RootStackParamList = {
   Home: undefined;
   Transaction: undefined;
   Beneficiaries: undefined;
+  BeneficiaryForm:
+    | {
+        /** Present to edit an existing beneficiary, absent to create one. */
+        beneficiaryId?: number;
+        prefillFirstName?: string;
+        prefillLastName?: string;
+        prefillIban?: string;
+      }
+    | undefined;
 };

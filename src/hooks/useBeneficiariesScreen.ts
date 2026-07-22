@@ -1,66 +1,31 @@
-import { useState } from 'react';
+import { Alert } from 'react-native';
 
 import { useTransactions } from '../TransactionContext';
-import { isValidIban, normalizeIban } from '../utils/iban';
+import { getBeneficiaryFullName } from '../utils/beneficiaries';
+import type { Beneficiary } from '../types';
 
 /**
- * Hook owning the beneficiary creation form state and validation for
- * BeneficiariesScreen. Returns the current beneficiaries, the controlled
- * inputs, their errors, and the add handler.
+ * Hook owning the beneficiaries list and its row actions for
+ * BeneficiariesScreen. Deletion goes through a confirmation alert.
  */
 export const useBeneficiariesScreen = () => {
-  const { beneficiaries, addBeneficiary } = useTransactions();
-  const [firstName, setFirstName] = useState('');
-  const [lastName, setLastName] = useState('');
-  const [iban, setIban] = useState('');
-  const [firstNameError, setFirstNameError] = useState('');
-  const [lastNameError, setLastNameError] = useState('');
-  const [ibanError, setIbanError] = useState('');
+  const { beneficiaries, deleteBeneficiary } = useTransactions();
 
-  const handleAdd = () => {
-    setFirstNameError('');
-    setLastNameError('');
-    setIbanError('');
-    if (firstName.trim() === '') {
-      setFirstNameError('Please enter a first name');
-      return;
-    }
-    if (lastName.trim() === '') {
-      setLastNameError('Please enter a last name');
-      return;
-    }
-    if (!isValidIban(iban)) {
-      setIbanError('Please enter a valid IBAN');
-      return;
-    }
-    const isDuplicate = beneficiaries.some(
-      beneficiary => normalizeIban(beneficiary.iban) === normalizeIban(iban),
+  /** Asks for confirmation, then deletes the beneficiary. */
+  const confirmDelete = (beneficiary: Beneficiary) => {
+    Alert.alert(
+      'Delete beneficiary',
+      `Remove ${getBeneficiaryFullName(beneficiary)} from your beneficiaries?`,
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Delete',
+          style: 'destructive',
+          onPress: () => deleteBeneficiary(beneficiary.id),
+        },
+      ],
     );
-    if (isDuplicate) {
-      setIbanError('This beneficiary already exists');
-      return;
-    }
-    addBeneficiary({
-      firstName: firstName.trim(),
-      lastName: lastName.trim(),
-      iban,
-    });
-    setFirstName('');
-    setLastName('');
-    setIban('');
   };
 
-  return {
-    beneficiaries,
-    firstName,
-    setFirstName,
-    lastName,
-    setLastName,
-    iban,
-    setIban,
-    firstNameError,
-    lastNameError,
-    ibanError,
-    handleAdd,
-  };
+  return { beneficiaries, confirmDelete };
 };

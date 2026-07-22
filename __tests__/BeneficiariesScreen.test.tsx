@@ -1,36 +1,67 @@
 import React from 'react';
+import { Alert } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { render, screen, userEvent } from '@testing-library/react-native';
-import { beforeEach, describe, expect, it } from '@jest/globals';
+import {
+  afterEach,
+  beforeEach,
+  describe,
+  expect,
+  it,
+  jest,
+} from '@jest/globals';
+import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 
 import BeneficiariesScreen from '../src/BeneficiariesScreen';
 import { TransactionProvider } from '../src/TransactionContext';
+import type { RootStackParamList } from '../src/types';
 
-const VALID_IBAN = 'GB29 NWBK 6016 1331 9268 19';
+type Navigation = NativeStackScreenProps<
+  RootStackParamList,
+  'Beneficiaries'
+>['navigation'];
 
-const renderScreen = async () =>
-  await render(
-    <TransactionProvider>
-      <BeneficiariesScreen />
-    </TransactionProvider>,
+const seedBeneficiary = () =>
+  AsyncStorage.setItem(
+    'app-state',
+    JSON.stringify({
+      version: 3,
+      transactions: [],
+      balanceCents: 100000,
+      beneficiaries: [
+        {
+          id: 1,
+          firstName: 'Jane',
+          lastName: 'Doe',
+          iban: 'GB29NWBK60161331926819',
+        },
+      ],
+    }),
   );
 
-const fillForm = async (
-  user: ReturnType<typeof userEvent.setup>,
-  {
-    firstName,
-    lastName,
-    iban,
-  }: { firstName: string; lastName: string; iban: string },
-) => {
-  await user.type(screen.getByPlaceholderText('First name'), firstName);
-  await user.type(screen.getByPlaceholderText('Last name'), lastName);
-  await user.type(screen.getByPlaceholderText('IBAN'), iban);
+const renderScreen = async () => {
+  const navigation = { navigate: jest.fn() };
+  await render(
+    <TransactionProvider>
+      <BeneficiariesScreen
+        navigation={navigation as unknown as Navigation}
+        route={{ key: 'beneficiaries-test', name: 'Beneficiaries' }}
+      />
+    </TransactionProvider>,
+  );
+  return navigation;
 };
 
 describe('BeneficiariesScreen', () => {
+  let alertSpy: jest.SpiedFunction<typeof Alert.alert>;
+
   beforeEach(async () => {
+    alertSpy = jest.spyOn(Alert, 'alert').mockImplementation(() => undefined);
     await AsyncStorage.clear();
+  });
+
+  afterEach(() => {
+    alertSpy.mockRestore();
   });
 
   it('shows an empty state when there are no beneficiaries', async () => {
@@ -38,60 +69,34 @@ describe('BeneficiariesScreen', () => {
     expect(await screen.findByText('No beneficiaries yet')).toBeTruthy();
   });
 
-  it('rejects an empty first name', async () => {
+  it('navigates to the form when Add Beneficiary is pressed', async () => {
     const user = userEvent.setup();
-    await renderScreen();
+    const navigation = await renderScreen();
     await user.press(await screen.findByText('Add Beneficiary'));
-    expect(await screen.findByText('Please enter a first name')).toBeTruthy();
+    expect(navigation.navigate).toHaveBeenCalledWith('BeneficiaryForm');
   });
 
-  it('rejects an invalid IBAN', async () => {
+  it('lists beneficiaries and navigates to edit with the beneficiary id', async () => {
     const user = userEvent.setup();
-    await renderScreen();
-    await fillForm(user, {
-      firstName: 'John',
-      lastName: 'Doe',
-      iban: 'not-an-iban',
-    });
-    await user.press(screen.getByText('Add Beneficiary'));
-    expect(await screen.findByText('Please enter a valid IBAN')).toBeTruthy();
-  });
-
-  it('adds a beneficiary, shows it in the list and clears the form', async () => {
-    const user = userEvent.setup();
-    await renderScreen();
-    await fillForm(user, {
-      firstName: 'John',
-      lastName: 'Doe',
-      iban: VALID_IBAN,
-    });
-    await user.press(screen.getByText('Add Beneficiary'));
-    expect(await screen.findByText('John Doe')).toBeTruthy();
+    await seedBeneficiary();
+    const navigation = await renderScreen();
+    expect(await screen.findByText('Jane Doe')).toBeTruthy();
     expect(screen.getByText('IBAN: GB29NWBK60161331926819')).toBeTruthy();
-    expect(screen.queryByText('No beneficiaries yet')).toBeNull();
+    await user.press(screen.getByText('Edit'));
+    expect(navigation.navigate).toHaveBeenCalledWith('BeneficiaryForm', {
+      beneficiaryId: 1,
+    });
   });
 
-  it('rejects a duplicate IBAN', async () => {
+  it('asks for confirmation before deleting a beneficiary', async () => {
     const user = userEvent.setup();
+    await seedBeneficiary();
     await renderScreen();
-    await fillForm(user, {
-      firstName: 'John',
-      lastName: 'Doe',
-      iban: VALID_IBAN,
-    });
-    await user.press(screen.getByText('Add Beneficiary'));
-    await screen.findByText('John Doe');
-
-    await fillForm(user, {
-      firstName: 'Jane',
-      lastName: 'Doe',
-      iban: 'gb29nwbk60161331926819',
-    });
-    await user.press(screen.getByText('Add Beneficiary'));
-    expect(
-      await screen.findByText('This beneficiary already exists'),
-    ).toBeTruthy();
-    // Jane was not added: the list still shows only John.
-    expect(screen.queryByText('Jane Doe')).toBeNull();
+    await user.press(await screen.findByText('Delete'));
+    expect(alertSpy).toHaveBeenCalledWith(
+      'Delete beneficiary',
+      'Remove Jane Doe from your beneficiaries?',
+      expect.any(Array),
+    );
   });
 });

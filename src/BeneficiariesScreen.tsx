@@ -1,36 +1,31 @@
 import React from 'react';
-import {
-  View,
-  Text,
-  TextInput,
-  Button,
-  FlatList,
-  StyleSheet,
-} from 'react-native';
+import { View, Text, Button, FlatList, StyleSheet } from 'react-native';
 
 import { useBeneficiariesScreen } from './hooks/useBeneficiariesScreen';
 import { getBeneficiaryFullName } from './utils/beneficiaries';
-import type { Beneficiary } from './types';
+import type { Beneficiary, RootStackParamList } from './types';
+import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 
-const BeneficiariesScreen = () => {
-  const {
-    beneficiaries,
-    firstName,
-    setFirstName,
-    lastName,
-    setLastName,
-    iban,
-    setIban,
-    firstNameError,
-    lastNameError,
-    ibanError,
-    handleAdd,
-  } = useBeneficiariesScreen();
+type Props = NativeStackScreenProps<RootStackParamList, 'Beneficiaries'>;
+
+const BeneficiariesScreen = ({ navigation }: Props) => {
+  const { beneficiaries, confirmDelete } = useBeneficiariesScreen();
 
   const renderItem = ({ item }: { item: Beneficiary }) => (
     <View style={styles.item}>
       <Text style={styles.itemText}>{getBeneficiaryFullName(item)}</Text>
       <Text style={styles.itemText}>IBAN: {item.iban}</Text>
+      <View style={styles.actions}>
+        <Button
+          title="Edit"
+          onPress={() =>
+            navigation.navigate('BeneficiaryForm', {
+              beneficiaryId: item.id,
+            })
+          }
+        />
+        <Button title="Delete" onPress={() => confirmDelete(item)} />
+      </View>
     </View>
   );
 
@@ -46,33 +41,11 @@ const BeneficiariesScreen = () => {
         }
         contentContainerStyle={styles.listContainer}
       />
-      <View style={styles.form}>
-        <TextInput
-          style={styles.input}
-          onChangeText={setFirstName}
-          value={firstName}
-          placeholder="First name"
+      <View style={styles.footer}>
+        <Button
+          title="Add Beneficiary"
+          onPress={() => navigation.navigate('BeneficiaryForm')}
         />
-        {firstNameError ? (
-          <Text style={styles.error}>{firstNameError}</Text>
-        ) : null}
-        <TextInput
-          style={styles.input}
-          onChangeText={setLastName}
-          value={lastName}
-          placeholder="Last name"
-        />
-        {lastNameError ? (
-          <Text style={styles.error}>{lastNameError}</Text>
-        ) : null}
-        <TextInput
-          style={styles.input}
-          onChangeText={setIban}
-          value={iban}
-          placeholder="IBAN"
-        />
-        {ibanError ? <Text style={styles.error}>{ibanError}</Text> : null}
-        <Button title="Add Beneficiary" onPress={handleAdd} />
       </View>
     </View>
   );
@@ -105,21 +78,16 @@ const styles = StyleSheet.create({
   itemText: {
     fontSize: 16,
   },
-  form: {
+  actions: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    gap: 8,
+    marginTop: 8,
+  },
+  footer: {
     padding: 16,
     borderTopWidth: 1,
     borderColor: '#ddd',
-  },
-  input: {
-    height: 40,
-    borderColor: 'gray',
-    borderWidth: 1,
-    marginVertical: 8,
-    paddingHorizontal: 8,
-  },
-  error: {
-    color: 'red',
-    marginBottom: 8,
   },
 });
 

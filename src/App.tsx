@@ -7,6 +7,7 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import HomeScreen from './HomeScreen';
 import TransactionScreen from './TransactionScreen';
 import BeneficiariesScreen from './BeneficiariesScreen';
+import BeneficiaryFormScreen from './BeneficiaryFormScreen';
 import { TransactionProvider, useTransactions } from './TransactionContext';
 import type { RootStackParamList } from './types';
 
@@ -29,6 +30,16 @@ const AppContent = () => {
         <Stack.Screen name="Home" component={HomeScreen} />
         <Stack.Screen name="Transaction" component={TransactionScreen} />
         <Stack.Screen name="Beneficiaries" component={BeneficiariesScreen} />
+        <Stack.Screen
+          name="BeneficiaryForm"
+          component={BeneficiaryFormScreen}
+          options={({ route }) => ({
+            title:
+              route.params?.beneficiaryId !== undefined
+                ? 'Edit Beneficiary'
+                : 'Add Beneficiary',
+          })}
+        />
       </Stack.Navigator>
     </NavigationContainer>
   );
