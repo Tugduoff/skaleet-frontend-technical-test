@@ -1,11 +1,15 @@
 import React from 'react';
+import { Alert } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { render, screen, fireEvent } from '@testing-library/react-native';
+import { render, screen, userEvent, act } from '@testing-library/react-native';
 import { beforeEach, describe, expect, it, jest } from '@jest/globals';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 
 import HomeScreen from '../src/HomeScreen';
-import { TransactionProvider } from '../src/TransactionContext';
+import {
+  TransactionProvider,
+  useTransactions,
+} from '../src/TransactionContext';
 import type { RootStackParamList } from '../src/types';
 
 type Navigation = NativeStackScreenProps<
@@ -103,11 +107,58 @@ describe('HomeScreen', () => {
   });
 
   it('navigates to the transaction and beneficiaries screens', async () => {
+    const user = userEvent.setup();
     const navigation = await renderScreen();
     await screen.findByText('Add Transaction');
-    fireEvent.press(screen.getByText('Add Transaction'));
+    await user.press(screen.getByText('Add Transaction'));
     expect(navigation.navigate).toHaveBeenCalledWith('Transaction');
-    fireEvent.press(screen.getByText('Beneficiaries'));
+    await user.press(screen.getByText('Beneficiaries'));
     expect(navigation.navigate).toHaveBeenCalledWith('Beneficiaries');
+  });
+
+  it('resets the demo data after confirmation', async () => {
+    const alertSpy = jest
+      .spyOn(Alert, 'alert')
+      .mockImplementation(() => undefined);
+    let context: ReturnType<typeof useTransactions>;
+    const Probe = () => {
+      context = useTransactions();
+      return null;
+    };
+    const navigation = buildNavigation();
+    await render(
+      <TransactionProvider>
+        <Probe />
+        <HomeScreen
+          navigation={navigation as unknown as Navigation}
+          route={{ key: 'home-test', name: 'Home', params: undefined }}
+        />
+      </TransactionProvider>,
+    );
+    await screen.findByText('Current Balance: $1000.00');
+    // Drive the state through the context rather than seeding storage:
+    // deterministic regardless of writes in flight from earlier tests.
+    await act(async () => {
+      context.addTransaction('42.50', {
+        name: 'John Doe',
+        iban: 'GB29 NWBK 6016 1331 9268 19',
+      });
+    });
+    await screen.findByText('Current Balance: $957.50');
+    const user = userEvent.setup();
+    await user.press(screen.getByText('Reset demo data'));
+    expect(alertSpy).toHaveBeenCalledWith(
+      'Reset demo data',
+      'Restore the initial balance and clear all transactions and beneficiaries?',
+      expect.any(Array),
+    );
+    const buttons = alertSpy.mock.calls[0][2];
+    const confirm = buttons?.find(button => button.text === 'Reset');
+    await act(async () => {
+      confirm?.onPress?.();
+    });
+    expect(await screen.findByText('Current Balance: $1000.00')).toBeTruthy();
+    expect(await screen.findByText('No transactions yet')).toBeTruthy();
+    alertSpy.mockRestore();
   });
 });

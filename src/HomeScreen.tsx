@@ -9,7 +9,8 @@ import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 type Props = NativeStackScreenProps<RootStackParamList, 'Home'>;
 
 const HomeScreen = ({ navigation }: Props) => {
-  const { transactions, balanceCents, formatAmount } = useHomeScreen();
+  const { transactions, balanceCents, formatAmount, confirmReset } =
+    useHomeScreen();
 
   const renderItem = ({ item }: { item: Transaction }) => (
     <View style={styles.item}>
@@ -40,6 +41,7 @@ const HomeScreen = ({ navigation }: Props) => {
         title="Beneficiaries"
         onPress={() => navigation.navigate('Beneficiaries')}
       />
+      <Button title="Reset demo data" onPress={confirmReset} />
       <FlatList
         data={transactions}
         keyExtractor={item => item.id.toString()}
