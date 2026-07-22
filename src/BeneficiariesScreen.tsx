@@ -9,23 +9,27 @@ import {
 } from 'react-native';
 
 import { useBeneficiariesScreen } from './hooks/useBeneficiariesScreen';
+import { getBeneficiaryFullName } from './utils/beneficiaries';
 import type { Beneficiary } from './types';
 
 const BeneficiariesScreen = () => {
   const {
     beneficiaries,
-    name,
-    setName,
+    firstName,
+    setFirstName,
+    lastName,
+    setLastName,
     iban,
     setIban,
-    nameError,
+    firstNameError,
+    lastNameError,
     ibanError,
     handleAdd,
   } = useBeneficiariesScreen();
 
   const renderItem = ({ item }: { item: Beneficiary }) => (
     <View style={styles.item}>
-      <Text style={styles.itemText}>{item.name}</Text>
+      <Text style={styles.itemText}>{getBeneficiaryFullName(item)}</Text>
       <Text style={styles.itemText}>IBAN: {item.iban}</Text>
     </View>
   );
@@ -45,16 +49,27 @@ const BeneficiariesScreen = () => {
       <View style={styles.form}>
         <TextInput
           style={styles.input}
-          onChangeText={setName}
-          value={name}
-          placeholder="Beneficiary name"
+          onChangeText={setFirstName}
+          value={firstName}
+          placeholder="First name"
         />
-        {nameError ? <Text style={styles.error}>{nameError}</Text> : null}
+        {firstNameError ? (
+          <Text style={styles.error}>{firstNameError}</Text>
+        ) : null}
+        <TextInput
+          style={styles.input}
+          onChangeText={setLastName}
+          value={lastName}
+          placeholder="Last name"
+        />
+        {lastNameError ? (
+          <Text style={styles.error}>{lastNameError}</Text>
+        ) : null}
         <TextInput
           style={styles.input}
           onChangeText={setIban}
           value={iban}
-          placeholder="Beneficiary IBAN"
+          placeholder="IBAN"
         />
         {ibanError ? <Text style={styles.error}>{ibanError}</Text> : null}
         <Button title="Add Beneficiary" onPress={handleAdd} />

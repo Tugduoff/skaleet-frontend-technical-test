@@ -33,13 +33,15 @@ describe('useBeneficiariesScreen', () => {
   it('starts with empty form state', async () => {
     await renderHook();
     expect(hook.beneficiaries).toEqual([]);
-    expect(hook.name).toBe('');
+    expect(hook.firstName).toBe('');
+    expect(hook.lastName).toBe('');
     expect(hook.iban).toBe('');
-    expect(hook.nameError).toBe('');
+    expect(hook.firstNameError).toBe('');
+    expect(hook.lastNameError).toBe('');
     expect(hook.ibanError).toBe('');
   });
 
-  it('rejects empty name', async () => {
+  it('rejects an empty first name', async () => {
     await renderHook();
     act(() => {
       hook.setIban(VALID_IBAN);
@@ -47,14 +49,28 @@ describe('useBeneficiariesScreen', () => {
     act(() => {
       hook.handleAdd();
     });
-    expect(hook.nameError).toBe('Please enter a name');
+    expect(hook.firstNameError).toBe('Please enter a first name');
+    expect(hook.beneficiaries).toEqual([]);
+  });
+
+  it('rejects an empty last name', async () => {
+    await renderHook();
+    act(() => {
+      hook.setFirstName('John');
+      hook.setIban(VALID_IBAN);
+    });
+    act(() => {
+      hook.handleAdd();
+    });
+    expect(hook.lastNameError).toBe('Please enter a last name');
     expect(hook.beneficiaries).toEqual([]);
   });
 
   it('rejects invalid IBAN', async () => {
     await renderHook();
     act(() => {
-      hook.setName('John Doe');
+      hook.setFirstName('John');
+      hook.setLastName('Doe');
       hook.setIban('invalid');
     });
     act(() => {
@@ -67,7 +83,8 @@ describe('useBeneficiariesScreen', () => {
   it('rejects a duplicate IBAN', async () => {
     await renderHook();
     act(() => {
-      hook.setName('John Doe');
+      hook.setFirstName('John');
+      hook.setLastName('Doe');
       hook.setIban(VALID_IBAN);
     });
     act(() => {
@@ -76,7 +93,8 @@ describe('useBeneficiariesScreen', () => {
     expect(hook.beneficiaries).toHaveLength(1);
 
     act(() => {
-      hook.setName('Jane Doe');
+      hook.setFirstName('Jane');
+      hook.setLastName('Doe');
       hook.setIban(VALID_IBAN);
     });
     act(() => {
@@ -89,17 +107,21 @@ describe('useBeneficiariesScreen', () => {
   it('adds a beneficiary and clears the form', async () => {
     await renderHook();
     act(() => {
-      hook.setName('John Doe');
+      hook.setFirstName('John');
+      hook.setLastName('Doe');
       hook.setIban(VALID_IBAN);
     });
     act(() => {
       hook.handleAdd();
     });
-    expect(hook.nameError).toBe('');
+    expect(hook.firstNameError).toBe('');
+    expect(hook.lastNameError).toBe('');
     expect(hook.ibanError).toBe('');
-    expect(hook.name).toBe('');
+    expect(hook.firstName).toBe('');
+    expect(hook.lastName).toBe('');
     expect(hook.iban).toBe('');
     expect(hook.beneficiaries).toHaveLength(1);
-    expect(hook.beneficiaries[0].name).toBe('John Doe');
+    expect(hook.beneficiaries[0].firstName).toBe('John');
+    expect(hook.beneficiaries[0].lastName).toBe('Doe');
   });
 });

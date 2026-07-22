@@ -41,12 +41,17 @@ describe('beneficiaries state', () => {
   it('adds a beneficiary with a generated id', async () => {
     await renderProvider();
     act(() => {
-      context.addBeneficiary('John Doe', VALID_IBAN);
+      context.addBeneficiary({
+        firstName: 'John',
+        lastName: 'Doe',
+        iban: VALID_IBAN,
+      });
     });
     expect(context.beneficiaries).toHaveLength(1);
     expect(context.beneficiaries[0]).toEqual({
       id: expect.any(Number),
-      name: 'John Doe',
+      firstName: 'John',
+      lastName: 'Doe',
       iban: 'GB29NWBK60161331926819',
     });
   });
@@ -54,18 +59,30 @@ describe('beneficiaries state', () => {
   it('appends without replacing existing beneficiaries', async () => {
     await renderProvider();
     act(() => {
-      context.addBeneficiary('John Doe', VALID_IBAN);
-      context.addBeneficiary('Jane Doe', 'DE89370400440532013000');
+      context.addBeneficiary({
+        firstName: 'John',
+        lastName: 'Doe',
+        iban: VALID_IBAN,
+      });
+      context.addBeneficiary({
+        firstName: 'Jane',
+        lastName: 'Doe',
+        iban: 'DE89370400440532013000',
+      });
     });
     expect(context.beneficiaries).toHaveLength(2);
-    expect(context.beneficiaries[1].name).toBe('Jane Doe');
+    expect(context.beneficiaries[1].firstName).toBe('Jane');
     expect(context.beneficiaries[0].id).not.toBe(context.beneficiaries[1].id);
   });
 
   it('stores the IBAN normalized', async () => {
     await renderProvider();
     act(() => {
-      context.addBeneficiary('John Doe', 'gb29 nwbk 6016 1331 9268 19');
+      context.addBeneficiary({
+        firstName: 'John',
+        lastName: 'Doe',
+        iban: 'gb29 nwbk 6016 1331 9268 19',
+      });
     });
     expect(context.beneficiaries[0].iban).toBe('GB29NWBK60161331926819');
   });
@@ -77,8 +94,16 @@ describe('beneficiaries state', () => {
   ])('ignores a duplicate IBAN (%s)', async duplicateIban => {
     await renderProvider();
     act(() => {
-      context.addBeneficiary('John Doe', VALID_IBAN);
-      context.addBeneficiary('Johnny Doe', duplicateIban);
+      context.addBeneficiary({
+        firstName: 'John',
+        lastName: 'Doe',
+        iban: VALID_IBAN,
+      });
+      context.addBeneficiary({
+        firstName: 'Johnny',
+        lastName: 'Doe',
+        iban: duplicateIban,
+      });
     });
     expect(context.beneficiaries).toHaveLength(1);
   });

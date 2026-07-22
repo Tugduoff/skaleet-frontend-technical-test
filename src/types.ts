@@ -3,8 +3,11 @@ export interface Account {
   iban: string;
 }
 
-export interface Beneficiary extends Account {
+export interface Beneficiary {
   id: number;
+  firstName: string;
+  lastName: string;
+  iban: string;
 }
 
 export interface Transaction {

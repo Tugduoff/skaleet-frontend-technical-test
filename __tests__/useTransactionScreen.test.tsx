@@ -131,13 +131,17 @@ describe('useTransactionScreen', () => {
   it('uses the selected beneficiary when not in manual entry', async () => {
     await renderHook();
     act(() => {
-      context.addBeneficiary('Jane Doe', VALID_IBAN);
+      context.addBeneficiary({
+        firstName: 'Jane',
+        lastName: 'Doe',
+        iban: VALID_IBAN,
+      });
     });
     act(() => {
       hook.setAmount('10');
     });
     expect(hook.useManualEntry).toBe(false);
-    expect(hook.selectedBeneficiary?.name).toBe('Jane Doe');
+    expect(hook.selectedBeneficiary?.firstName).toBe('Jane');
     let ok = false;
     act(() => {
       ok = hook.submit();

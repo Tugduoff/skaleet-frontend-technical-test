@@ -19,7 +19,14 @@ const state = {
     },
   ],
   balanceCents: 95750,
-  beneficiaries: [{ id: 2, name: 'John Doe', iban: 'GB29NWBK60161331926819' }],
+  beneficiaries: [
+    {
+      id: 2,
+      firstName: 'John',
+      lastName: 'Doe',
+      iban: 'GB29NWBK60161331926819',
+    },
+  ],
 };
 
 /** Schema v1 fixture: monetary values as fractional major units. */
@@ -33,6 +40,14 @@ const v1State = {
     },
   ],
   balance: 957.5,
+  beneficiaries: [{ id: 2, name: 'John Doe', iban: 'GB29NWBK60161331926819' }],
+};
+
+/** Schema v2 fixture: integer cents, beneficiaries with a single name. */
+const v2State = {
+  version: 2,
+  transactions: state.transactions,
+  balanceCents: state.balanceCents,
   beneficiaries: [{ id: 2, name: 'John Doe', iban: 'GB29NWBK60161331926819' }],
 };
 
@@ -55,7 +70,7 @@ describe('storage', () => {
 
   it('round-trips the state with a version field', async () => {
     await saveState(state);
-    expect(await loadState()).toEqual({ version: 2, ...state });
+    expect(await loadState()).toEqual({ version: 3, ...state });
   });
 
   it('returns null and warns for a payload from a newer version', async () => {
@@ -74,7 +89,7 @@ describe('storage', () => {
   });
 
   it('returns null and warns when stored fields are missing', async () => {
-    await AsyncStorage.setItem('app-state', JSON.stringify({ version: 2 }));
+    await AsyncStorage.setItem('app-state', JSON.stringify({ version: 3 }));
     expect(await loadState()).toBeNull();
     expect(warnSpy).toHaveBeenCalled();
   });
@@ -83,7 +98,7 @@ describe('storage', () => {
     await AsyncStorage.setItem(
       'app-state',
       JSON.stringify({
-        version: 2,
+        version: 3,
         transactions: [],
         balanceCents: 100.5,
         beneficiaries: [],
@@ -94,7 +109,7 @@ describe('storage', () => {
     await AsyncStorage.setItem(
       'app-state',
       JSON.stringify({
-        version: 2,
+        version: 3,
         transactions: [],
         balanceCents: -100,
         beneficiaries: [],
@@ -107,7 +122,7 @@ describe('storage', () => {
     await AsyncStorage.setItem(
       'app-state',
       JSON.stringify({
-        version: 2,
+        version: 3,
         transactions: [
           { id: 1, amountCents: 10.5, account: { name: 'X', iban: 'Y' } },
         ],
@@ -118,11 +133,24 @@ describe('storage', () => {
     expect(await loadState()).toBeNull();
   });
 
+  it('returns null when a beneficiary is malformed', async () => {
+    await AsyncStorage.setItem(
+      'app-state',
+      JSON.stringify({
+        version: 3,
+        transactions: [],
+        balanceCents: 0,
+        beneficiaries: [{ id: 2, firstName: 'John', iban: 'GB29' }],
+      }),
+    );
+    expect(await loadState()).toBeNull();
+  });
+
   it('returns null when stored fields have wrong types', async () => {
     await AsyncStorage.setItem(
       'app-state',
       JSON.stringify({
-        version: 2,
+        version: 3,
         transactions: {},
         balanceCents: 'lots',
         beneficiaries: [],
@@ -164,10 +192,10 @@ describe('storage migrations', () => {
     warnSpy.mockRestore();
   });
 
-  it('migrates a v1 payload to v2, converting fractional units to cents', async () => {
+  it('migrates a v1 payload to v3: cents conversion and name split', async () => {
     await AsyncStorage.setItem('app-state', JSON.stringify(v1State));
     expect(await loadState()).toEqual({
-      version: 2,
+      version: 3,
       transactions: [
         {
           id: 1,
@@ -176,7 +204,14 @@ describe('storage migrations', () => {
         },
       ],
       balanceCents: 95750,
-      beneficiaries: v1State.beneficiaries,
+      beneficiaries: [
+        {
+          id: 2,
+          firstName: 'John',
+          lastName: 'Doe',
+          iban: 'GB29NWBK60161331926819',
+        },
+      ],
     });
   });
 
@@ -185,12 +220,34 @@ describe('storage migrations', () => {
       'app-state',
       JSON.stringify({ ...v1State, transactions: [], balance: 19.999 }),
     );
-    expect(await loadState()).toEqual({
-      version: 2,
-      transactions: [],
-      balanceCents: 2000,
-      beneficiaries: v1State.beneficiaries,
-    });
+    const migrated = await loadState();
+    expect(migrated?.balanceCents).toBe(2000);
+  });
+
+  it('migrates a v2 payload to v3, splitting the beneficiary name', async () => {
+    await AsyncStorage.setItem('app-state', JSON.stringify(v2State));
+    expect(await loadState()).toEqual({ version: 3, ...state });
+  });
+
+  it('migrates a single-word beneficiary name to an empty lastName', async () => {
+    await AsyncStorage.setItem(
+      'app-state',
+      JSON.stringify({
+        ...v2State,
+        beneficiaries: [
+          { id: 2, name: 'Madonna', iban: 'DE89370400440532013000' },
+        ],
+      }),
+    );
+    const migrated = await loadState();
+    expect(migrated?.beneficiaries).toEqual([
+      {
+        id: 2,
+        firstName: 'Madonna',
+        lastName: '',
+        iban: 'DE89370400440532013000',
+      },
+    ]);
   });
 
   it('returns null and warns when a v1 payload is malformed', async () => {
@@ -210,6 +267,18 @@ describe('storage migrations', () => {
         transactions: [
           { id: 1, amount: '42.50', account: { name: 'X', iban: 'Y' } },
         ],
+      }),
+    );
+    expect(await loadState()).toBeNull();
+    expect(warnSpy).toHaveBeenCalled();
+  });
+
+  it('returns null and warns when a v2 beneficiary is malformed', async () => {
+    await AsyncStorage.setItem(
+      'app-state',
+      JSON.stringify({
+        ...v2State,
+        beneficiaries: [{ id: 2, iban: 'GB29NWBK60161331926819' }],
       }),
     );
     expect(await loadState()).toBeNull();

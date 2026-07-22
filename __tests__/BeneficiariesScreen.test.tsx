@@ -15,6 +15,19 @@ const renderScreen = async () =>
     </TransactionProvider>,
   );
 
+const fillForm = async (
+  user: ReturnType<typeof userEvent.setup>,
+  {
+    firstName,
+    lastName,
+    iban,
+  }: { firstName: string; lastName: string; iban: string },
+) => {
+  await user.type(screen.getByPlaceholderText('First name'), firstName);
+  await user.type(screen.getByPlaceholderText('Last name'), lastName);
+  await user.type(screen.getByPlaceholderText('IBAN'), iban);
+};
+
 describe('BeneficiariesScreen', () => {
   beforeEach(async () => {
     await AsyncStorage.clear();
@@ -25,24 +38,21 @@ describe('BeneficiariesScreen', () => {
     expect(await screen.findByText('No beneficiaries yet')).toBeTruthy();
   });
 
-  it('rejects an empty name', async () => {
+  it('rejects an empty first name', async () => {
     const user = userEvent.setup();
     await renderScreen();
     await user.press(await screen.findByText('Add Beneficiary'));
-    expect(await screen.findByText('Please enter a name')).toBeTruthy();
+    expect(await screen.findByText('Please enter a first name')).toBeTruthy();
   });
 
   it('rejects an invalid IBAN', async () => {
     const user = userEvent.setup();
     await renderScreen();
-    await user.type(
-      screen.getByPlaceholderText('Beneficiary name'),
-      'John Doe',
-    );
-    await user.type(
-      screen.getByPlaceholderText('Beneficiary IBAN'),
-      'not-an-iban',
-    );
+    await fillForm(user, {
+      firstName: 'John',
+      lastName: 'Doe',
+      iban: 'not-an-iban',
+    });
     await user.press(screen.getByText('Add Beneficiary'));
     expect(await screen.findByText('Please enter a valid IBAN')).toBeTruthy();
   });
@@ -50,14 +60,11 @@ describe('BeneficiariesScreen', () => {
   it('adds a beneficiary, shows it in the list and clears the form', async () => {
     const user = userEvent.setup();
     await renderScreen();
-    await user.type(
-      screen.getByPlaceholderText('Beneficiary name'),
-      'John Doe',
-    );
-    await user.type(
-      screen.getByPlaceholderText('Beneficiary IBAN'),
-      VALID_IBAN,
-    );
+    await fillForm(user, {
+      firstName: 'John',
+      lastName: 'Doe',
+      iban: VALID_IBAN,
+    });
     await user.press(screen.getByText('Add Beneficiary'));
     expect(await screen.findByText('John Doe')).toBeTruthy();
     expect(screen.getByText('IBAN: GB29NWBK60161331926819')).toBeTruthy();
@@ -67,25 +74,19 @@ describe('BeneficiariesScreen', () => {
   it('rejects a duplicate IBAN', async () => {
     const user = userEvent.setup();
     await renderScreen();
-    await user.type(
-      screen.getByPlaceholderText('Beneficiary name'),
-      'John Doe',
-    );
-    await user.type(
-      screen.getByPlaceholderText('Beneficiary IBAN'),
-      VALID_IBAN,
-    );
+    await fillForm(user, {
+      firstName: 'John',
+      lastName: 'Doe',
+      iban: VALID_IBAN,
+    });
     await user.press(screen.getByText('Add Beneficiary'));
     await screen.findByText('John Doe');
 
-    await user.type(
-      screen.getByPlaceholderText('Beneficiary name'),
-      'Jane Doe',
-    );
-    await user.type(
-      screen.getByPlaceholderText('Beneficiary IBAN'),
-      'gb29nwbk60161331926819',
-    );
+    await fillForm(user, {
+      firstName: 'Jane',
+      lastName: 'Doe',
+      iban: 'gb29nwbk60161331926819',
+    });
     await user.press(screen.getByText('Add Beneficiary'));
     expect(
       await screen.findByText('This beneficiary already exists'),

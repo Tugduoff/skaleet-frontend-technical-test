@@ -25,11 +25,16 @@ const seedBeneficiary = () =>
   AsyncStorage.setItem(
     'app-state',
     JSON.stringify({
-      version: 2,
+      version: 3,
       transactions: [],
       balanceCents: 100000,
       beneficiaries: [
-        { id: 1, name: 'Jane Doe', iban: 'GB29NWBK60161331926819' },
+        {
+          id: 1,
+          firstName: 'Jane',
+          lastName: 'Doe',
+          iban: 'GB29NWBK60161331926819',
+        },
       ],
     }),
   );

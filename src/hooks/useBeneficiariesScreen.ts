@@ -10,16 +10,23 @@ import { isValidIban, normalizeIban } from '../utils/iban';
  */
 export const useBeneficiariesScreen = () => {
   const { beneficiaries, addBeneficiary } = useTransactions();
-  const [name, setName] = useState('');
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
   const [iban, setIban] = useState('');
-  const [nameError, setNameError] = useState('');
+  const [firstNameError, setFirstNameError] = useState('');
+  const [lastNameError, setLastNameError] = useState('');
   const [ibanError, setIbanError] = useState('');
 
   const handleAdd = () => {
-    setNameError('');
+    setFirstNameError('');
+    setLastNameError('');
     setIbanError('');
-    if (name.trim() === '') {
-      setNameError('Please enter a name');
+    if (firstName.trim() === '') {
+      setFirstNameError('Please enter a first name');
+      return;
+    }
+    if (lastName.trim() === '') {
+      setLastNameError('Please enter a last name');
       return;
     }
     if (!isValidIban(iban)) {
@@ -33,18 +40,26 @@ export const useBeneficiariesScreen = () => {
       setIbanError('This beneficiary already exists');
       return;
     }
-    addBeneficiary(name.trim(), iban);
-    setName('');
+    addBeneficiary({
+      firstName: firstName.trim(),
+      lastName: lastName.trim(),
+      iban,
+    });
+    setFirstName('');
+    setLastName('');
     setIban('');
   };
 
   return {
     beneficiaries,
-    name,
-    setName,
+    firstName,
+    setFirstName,
+    lastName,
+    setLastName,
     iban,
     setIban,
-    nameError,
+    firstNameError,
+    lastNameError,
     ibanError,
     handleAdd,
   };

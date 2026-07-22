@@ -3,6 +3,7 @@ import { View, Text, TextInput, Button, StyleSheet } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 
 import { useTransactionScreen } from './hooks/useTransactionScreen';
+import { getBeneficiaryFullName } from './utils/beneficiaries';
 import type { RootStackParamList } from './types';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 
@@ -52,7 +53,7 @@ const TransactionScreen = ({ navigation }: Props) => {
           {beneficiaries.map(beneficiary => (
             <Picker.Item
               key={beneficiary.id}
-              label={`${beneficiary.name} - ${beneficiary.iban}`}
+              label={`${getBeneficiaryFullName(beneficiary)} - ${beneficiary.iban}`}
               value={beneficiary.id}
             />
           ))}
