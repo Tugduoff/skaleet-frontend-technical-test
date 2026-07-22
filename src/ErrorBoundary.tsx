@@ -2,6 +2,8 @@ import React from 'react';
 import { View, Text, Button, StyleSheet } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { t } from './i18n';
+
 interface ErrorBoundaryProps {
   children: React.ReactNode;
 }
@@ -25,9 +27,9 @@ const Fallback = ({
         styles.container,
         { paddingTop: insets.top, paddingBottom: insets.bottom },
       ]}>
-      <Text style={styles.title}>Something went wrong</Text>
+      <Text style={styles.title}>{t('errorBoundary.title')}</Text>
       <Text style={styles.message}>{error.message}</Text>
-      <Button title="Try again" onPress={onRetry} />
+      <Button title={t('errorBoundary.retry')} onPress={onRetry} />
     </View>
   );
 };

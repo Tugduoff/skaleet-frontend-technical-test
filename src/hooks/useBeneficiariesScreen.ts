@@ -2,6 +2,7 @@ import { Alert } from 'react-native';
 
 import { useTransactions } from '../TransactionContext';
 import { getBeneficiaryFullName } from '../utils/beneficiaries';
+import { t } from '../i18n';
 import type { Beneficiary } from '../types';
 
 /**
@@ -14,12 +15,14 @@ export const useBeneficiariesScreen = () => {
   /** Asks for confirmation, then deletes the beneficiary. */
   const confirmDelete = (beneficiary: Beneficiary) => {
     Alert.alert(
-      'Delete beneficiary',
-      `Remove ${getBeneficiaryFullName(beneficiary)} from your beneficiaries?`,
+      t('beneficiaries.deleteTitle'),
+      t('beneficiaries.deleteMessage', {
+        name: getBeneficiaryFullName(beneficiary),
+      }),
       [
-        { text: 'Cancel', style: 'cancel' },
+        { text: t('common.cancel'), style: 'cancel' },
         {
-          text: 'Delete',
+          text: t('beneficiaries.deleteConfirm'),
           style: 'destructive',
           onPress: () => deleteBeneficiary(beneficiary.id),
         },

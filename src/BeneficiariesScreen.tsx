@@ -4,6 +4,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useBeneficiariesScreen } from './hooks/useBeneficiariesScreen';
 import { getBeneficiaryFullName } from './utils/beneficiaries';
+import { t } from './i18n';
 import type { Beneficiary, RootStackParamList } from './types';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 
@@ -17,17 +18,22 @@ const BeneficiariesScreen = ({ navigation }: Props) => {
   const renderItem = ({ item }: { item: Beneficiary }) => (
     <View style={styles.item}>
       <Text style={styles.itemText}>{getBeneficiaryFullName(item)}</Text>
-      <Text style={styles.itemText}>IBAN: {item.iban}</Text>
+      <Text style={styles.itemText}>
+        {t('beneficiaries.iban', { iban: item.iban })}
+      </Text>
       <View style={styles.actions}>
         <Button
-          title="Edit"
+          title={t('beneficiaries.edit')}
           onPress={() =>
             navigation.navigate('BeneficiaryForm', {
               beneficiaryId: item.id,
             })
           }
         />
-        <Button title="Delete" onPress={() => confirmDelete(item)} />
+        <Button
+          title={t('beneficiaries.delete')}
+          onPress={() => confirmDelete(item)}
+        />
       </View>
     </View>
   );
@@ -40,13 +46,13 @@ const BeneficiariesScreen = ({ navigation }: Props) => {
         keyExtractor={item => item.id.toString()}
         renderItem={renderItem}
         ListEmptyComponent={
-          <Text style={styles.emptyText}>No beneficiaries yet</Text>
+          <Text style={styles.emptyText}>{t('beneficiaries.empty')}</Text>
         }
         contentContainerStyle={styles.listContainer}
       />
       <View style={styles.footer}>
         <Button
-          title="Add Beneficiary"
+          title={t('beneficiaries.add')}
           onPress={() => navigation.navigate('BeneficiaryForm')}
         />
       </View>

@@ -98,7 +98,7 @@ describe('HomeScreen', () => {
     await renderScreen();
     await screen.findByText('To: Newer');
     const recipients = screen.getAllByText(/^To: /);
-    expect(recipients.map(row => row.props.children.join(''))).toEqual([
+    expect(recipients.map(row => row.props.children)).toEqual([
       'To: Newer',
       'To: Older',
     ]);

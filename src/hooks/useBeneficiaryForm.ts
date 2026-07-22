@@ -1,6 +1,7 @@
 import { useState } from 'react';
 
 import { useTransactions } from '../TransactionContext';
+import { t } from '../i18n';
 import { isValidIban, normalizeIban } from '../utils/iban';
 
 /** Route parameters accepted by BeneficiaryFormScreen. */
@@ -47,15 +48,15 @@ export const useBeneficiaryForm = (params: BeneficiaryFormParams) => {
     setLastNameError('');
     setIbanError('');
     if (firstName.trim() === '') {
-      setFirstNameError('Please enter a first name');
+      setFirstNameError(t('errors.firstNameRequired'));
       return false;
     }
     if (lastName.trim() === '') {
-      setLastNameError('Please enter a last name');
+      setLastNameError(t('errors.lastNameRequired'));
       return false;
     }
     if (!isValidIban(iban)) {
-      setIbanError('Please enter a valid IBAN');
+      setIbanError(t('errors.ibanInvalid'));
       return false;
     }
     const normalizedIban = normalizeIban(iban);
@@ -65,7 +66,7 @@ export const useBeneficiaryForm = (params: BeneficiaryFormParams) => {
         beneficiary.iban === normalizedIban,
     );
     if (isDuplicate) {
-      setIbanError('This beneficiary already exists');
+      setIbanError(t('errors.ibanDuplicate'));
       return false;
     }
     if (isEditMode) {

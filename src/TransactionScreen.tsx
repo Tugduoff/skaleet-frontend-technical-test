@@ -5,6 +5,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useTransactionScreen } from './hooks/useTransactionScreen';
 import { getBeneficiaryFullName, splitFullName } from './utils/beneficiaries';
+import { t } from './i18n';
 import { normalizeIban } from './utils/iban';
 import type { RootStackParamList } from './types';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
@@ -45,22 +46,26 @@ const TransactionScreen = ({ navigation }: Props) => {
     }
     // Manual recipient not yet saved: offer to reuse it next time.
     const { firstName, lastName } = splitFullName(name);
-    Alert.alert('Save recipient', `Add ${name.trim()} to your beneficiaries?`, [
-      {
-        text: 'No thanks',
-        style: 'cancel',
-        onPress: () => navigation.goBack(),
-      },
-      {
-        text: 'Save',
-        onPress: () =>
-          navigation.replace('BeneficiaryForm', {
-            prefillFirstName: firstName,
-            prefillLastName: lastName,
-            prefillIban: iban,
-          }),
-      },
-    ]);
+    Alert.alert(
+      t('transaction.saveTitle'),
+      t('transaction.saveMessage', { name: name.trim() }),
+      [
+        {
+          text: t('transaction.saveDecline'),
+          style: 'cancel',
+          onPress: () => navigation.goBack(),
+        },
+        {
+          text: t('transaction.saveConfirm'),
+          onPress: () =>
+            navigation.replace('BeneficiaryForm', {
+              prefillFirstName: firstName,
+              prefillLastName: lastName,
+              prefillIban: iban,
+            }),
+        },
+      ],
+    );
   };
 
   return (
@@ -70,7 +75,7 @@ const TransactionScreen = ({ navigation }: Props) => {
         onChangeText={setAmount}
         value={amount}
         keyboardType="numeric"
-        placeholder="Enter amount"
+        placeholder={t('transaction.amountPlaceholder')}
       />
       {amountError ? <Text style={styles.error}>{amountError}</Text> : null}
       {beneficiaries.length > 0 && (
@@ -86,34 +91,32 @@ const TransactionScreen = ({ navigation }: Props) => {
               value={beneficiary.id}
             />
           ))}
-          <Picker.Item label="Enter manually…" value="manual" />
+          <Picker.Item label={t('transaction.manualEntry')} value="manual" />
         </Picker>
       )}
       {useManualEntry && (
         <>
           {beneficiaries.length === 0 && (
-            <Text style={styles.hint}>
-              No saved beneficiaries — enter the recipient manually
-            </Text>
+            <Text style={styles.hint}>{t('transaction.manualHint')}</Text>
           )}
           <TextInput
             style={styles.input}
             onChangeText={setName}
             value={name}
-            placeholder="Recipient Name"
+            placeholder={t('transaction.recipientName')}
           />
           {nameError ? <Text style={styles.error}>{nameError}</Text> : null}
           <TextInput
             style={styles.input}
             onChangeText={setIban}
             value={iban}
-            placeholder="Recipient IBAN"
+            placeholder={t('transaction.recipientIban')}
           />
           {ibanError ? <Text style={styles.error}>{ibanError}</Text> : null}
         </>
       )}
       <Button
-        title="Submit Transaction"
+        title={t('transaction.submit')}
         onPress={handleTransaction}
         disabled={isSubmitting}
       />

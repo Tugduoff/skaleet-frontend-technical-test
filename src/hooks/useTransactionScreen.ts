@@ -1,6 +1,7 @@
 import { useRef, useState } from 'react';
 
 import { useTransactions } from '../TransactionContext';
+import { t } from '../i18n';
 import { getAmountError } from '../utils/amount';
 import { isValidIban } from '../utils/iban';
 import {
@@ -51,11 +52,11 @@ export const useTransactionScreen = () => {
     let account: Account | null = null;
     if (useManualEntry) {
       if (name.trim() === '') {
-        setNameError('Please enter a name');
+        setNameError(t('errors.nameRequired'));
         return false;
       }
       if (!isValidIban(iban)) {
-        setIbanError('Please enter a valid IBAN');
+        setIbanError(t('errors.ibanInvalid'));
         return false;
       }
       account = { name: name.trim(), iban };
@@ -74,7 +75,7 @@ export const useTransactionScreen = () => {
     // changed since this screen rendered.
     if (!addTransaction(amount, account)) {
       submittingRef.current = false;
-      setAmountError('Transaction could not be completed, please try again');
+      setAmountError(t('transaction.submitFailed'));
       setIsSubmitting(false);
       return false;
     }

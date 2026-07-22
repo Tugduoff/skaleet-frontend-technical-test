@@ -1,3 +1,5 @@
+import { t } from '../i18n';
+
 /**
  * Parses a user-entered amount into integer cents.
  *
@@ -25,17 +27,17 @@ export const getAmountError = (
   balanceCents: number,
 ): string | null => {
   if (amount.trim() === '') {
-    return 'Please enter an amount';
+    return t('errors.amountRequired');
   }
   const cents = parseAmountToCents(amount);
   if (cents === null) {
-    return 'Please enter a valid amount';
+    return t('errors.amountInvalid');
   }
   if (cents <= 0) {
-    return 'Amount must be greater than 0';
+    return t('errors.amountPositive');
   }
   if (cents > balanceCents) {
-    return 'Amount exceeds current balance';
+    return t('errors.amountExceeds');
   }
   return null;
 };
