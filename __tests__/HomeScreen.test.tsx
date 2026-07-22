@@ -68,6 +68,40 @@ describe('HomeScreen', () => {
     expect(screen.getByText('IBAN: GB29NWBK60161331926819')).toBeTruthy();
   });
 
+  it('shows transactions newest-first with their dates', async () => {
+    await AsyncStorage.setItem(
+      'app-state',
+      JSON.stringify({
+        version: 4,
+        transactions: [
+          {
+            id: 1,
+            amountCents: 1000,
+            account: { name: 'Older', iban: 'GB29NWBK60161331926819' },
+            createdAt: '2026-07-20T09:05:00',
+          },
+          {
+            id: 2,
+            amountCents: 2000,
+            account: { name: 'Newer', iban: 'DE89370400440532013000' },
+            createdAt: '2026-07-22T14:30:00',
+          },
+        ],
+        balanceCents: 100000,
+        beneficiaries: [],
+      }),
+    );
+    await renderScreen();
+    await screen.findByText('To: Newer');
+    const recipients = screen.getAllByText(/^To: /);
+    expect(recipients.map(row => row.props.children.join(''))).toEqual([
+      'To: Newer',
+      'To: Older',
+    ]);
+    expect(screen.getByText('Date: 2026-07-22 14:30')).toBeTruthy();
+    expect(screen.getByText('Date: 2026-07-20 09:05')).toBeTruthy();
+  });
+
   it('navigates to the transaction and beneficiaries screens', async () => {
     const navigation = await renderScreen();
     await screen.findByText('Add Transaction');

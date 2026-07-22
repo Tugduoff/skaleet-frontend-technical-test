@@ -15,6 +15,8 @@ export interface Transaction {
   /** Integer cents, e.g. 1050 for 10.50. */
   amountCents: number;
   account: Account;
+  /** ISO 8601 creation timestamp. */
+  createdAt: string;
 }
 
 export type RootStackParamList = {

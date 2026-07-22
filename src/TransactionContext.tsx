@@ -110,6 +110,7 @@ export const TransactionProvider = ({ children }: { children: ReactNode }) => {
         id: nextId(),
         amountCents,
         account: { ...account, iban: normalizeIban(account.iban) },
+        createdAt: new Date().toISOString(),
       },
     ]);
     return true;

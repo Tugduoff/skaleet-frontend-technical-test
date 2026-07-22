@@ -2,6 +2,7 @@ import React from 'react';
 import { View, Text, Button, FlatList, StyleSheet } from 'react-native';
 
 import { useHomeScreen } from './hooks/useHomeScreen';
+import { formatDate } from './utils/date';
 import type { RootStackParamList, Transaction } from './types';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 
@@ -22,6 +23,7 @@ const HomeScreen = ({ navigation }: Props) => {
           <Text style={styles.itemText}>IBAN: {item.account.iban}</Text>
         </>
       )}
+      <Text style={styles.itemText}>Date: {formatDate(item.createdAt)}</Text>
     </View>
   );
 

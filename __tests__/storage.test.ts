@@ -16,6 +16,7 @@ const state = {
       id: 1,
       amountCents: 4250,
       account: { name: 'John Doe', iban: 'GB29NWBK60161331926819' },
+      createdAt: '2026-07-22T12:00:00.000Z',
     },
   ],
   balanceCents: 95750,
@@ -46,9 +47,23 @@ const v1State = {
 /** Schema v2 fixture: integer cents, beneficiaries with a single name. */
 const v2State = {
   version: 2,
-  transactions: state.transactions,
-  balanceCents: state.balanceCents,
+  transactions: [
+    {
+      id: 1,
+      amountCents: 4250,
+      account: { name: 'John Doe', iban: 'GB29NWBK60161331926819' },
+    },
+  ],
+  balanceCents: 95750,
   beneficiaries: [{ id: 2, name: 'John Doe', iban: 'GB29NWBK60161331926819' }],
+};
+
+/** Schema v3 fixture: beneficiary first/last names, no transaction timestamps. */
+const v3State = {
+  version: 3,
+  transactions: v2State.transactions,
+  balanceCents: 95750,
+  beneficiaries: state.beneficiaries,
 };
 
 describe('storage', () => {
@@ -70,7 +85,7 @@ describe('storage', () => {
 
   it('round-trips the state with a version field', async () => {
     await saveState(state);
-    expect(await loadState()).toEqual({ version: 3, ...state });
+    expect(await loadState()).toEqual({ version: 4, ...state });
   });
 
   it('returns null and warns for a payload from a newer version', async () => {
@@ -89,7 +104,7 @@ describe('storage', () => {
   });
 
   it('returns null and warns when stored fields are missing', async () => {
-    await AsyncStorage.setItem('app-state', JSON.stringify({ version: 3 }));
+    await AsyncStorage.setItem('app-state', JSON.stringify({ version: 4 }));
     expect(await loadState()).toBeNull();
     expect(warnSpy).toHaveBeenCalled();
   });
@@ -98,7 +113,7 @@ describe('storage', () => {
     await AsyncStorage.setItem(
       'app-state',
       JSON.stringify({
-        version: 3,
+        version: 4,
         transactions: [],
         balanceCents: 100.5,
         beneficiaries: [],
@@ -109,7 +124,7 @@ describe('storage', () => {
     await AsyncStorage.setItem(
       'app-state',
       JSON.stringify({
-        version: 3,
+        version: 4,
         transactions: [],
         balanceCents: -100,
         beneficiaries: [],
@@ -122,9 +137,29 @@ describe('storage', () => {
     await AsyncStorage.setItem(
       'app-state',
       JSON.stringify({
-        version: 3,
+        version: 4,
         transactions: [
-          { id: 1, amountCents: 10.5, account: { name: 'X', iban: 'Y' } },
+          {
+            id: 1,
+            amountCents: 10.5,
+            account: { name: 'X', iban: 'Y' },
+            createdAt: '2026-07-22T12:00:00.000Z',
+          },
+        ],
+        balanceCents: 0,
+        beneficiaries: [],
+      }),
+    );
+    expect(await loadState()).toBeNull();
+  });
+
+  it('returns null when a transaction misses createdAt', async () => {
+    await AsyncStorage.setItem(
+      'app-state',
+      JSON.stringify({
+        version: 4,
+        transactions: [
+          { id: 1, amountCents: 1050, account: { name: 'X', iban: 'Y' } },
         ],
         balanceCents: 0,
         beneficiaries: [],
@@ -137,7 +172,7 @@ describe('storage', () => {
     await AsyncStorage.setItem(
       'app-state',
       JSON.stringify({
-        version: 3,
+        version: 4,
         transactions: [],
         balanceCents: 0,
         beneficiaries: [{ id: 2, firstName: 'John', iban: 'GB29' }],
@@ -150,7 +185,7 @@ describe('storage', () => {
     await AsyncStorage.setItem(
       'app-state',
       JSON.stringify({
-        version: 3,
+        version: 4,
         transactions: {},
         balanceCents: 'lots',
         beneficiaries: [],
@@ -192,15 +227,16 @@ describe('storage migrations', () => {
     warnSpy.mockRestore();
   });
 
-  it('migrates a v1 payload to v3: cents conversion and name split', async () => {
+  it('migrates a v1 payload to v4: cents, name split and timestamps', async () => {
     await AsyncStorage.setItem('app-state', JSON.stringify(v1State));
     expect(await loadState()).toEqual({
-      version: 3,
+      version: 4,
       transactions: [
         {
           id: 1,
           amountCents: 4250,
           account: { name: 'John Doe', iban: 'GB29NWBK60161331926819' },
+          createdAt: expect.any(String),
         },
       ],
       balanceCents: 95750,
@@ -224,9 +260,28 @@ describe('storage migrations', () => {
     expect(migrated?.balanceCents).toBe(2000);
   });
 
-  it('migrates a v2 payload to v3, splitting the beneficiary name', async () => {
+  it('migrates a v2 payload to v4, splitting the beneficiary name', async () => {
     await AsyncStorage.setItem('app-state', JSON.stringify(v2State));
-    expect(await loadState()).toEqual({ version: 3, ...state });
+    expect(await loadState()).toEqual({
+      version: 4,
+      transactions: [
+        { ...v2State.transactions[0], createdAt: expect.any(String) },
+      ],
+      balanceCents: 95750,
+      beneficiaries: state.beneficiaries,
+    });
+  });
+
+  it('migrates a v3 payload to v4, stamping transactions with createdAt', async () => {
+    await AsyncStorage.setItem('app-state', JSON.stringify(v3State));
+    expect(await loadState()).toEqual({
+      version: 4,
+      transactions: [
+        { ...v3State.transactions[0], createdAt: expect.any(String) },
+      ],
+      balanceCents: 95750,
+      beneficiaries: state.beneficiaries,
+    });
   });
 
   it('migrates a single-word beneficiary name to an empty lastName', async () => {
@@ -279,6 +334,24 @@ describe('storage migrations', () => {
       JSON.stringify({
         ...v2State,
         beneficiaries: [{ id: 2, iban: 'GB29NWBK60161331926819' }],
+      }),
+    );
+    expect(await loadState()).toBeNull();
+    expect(warnSpy).toHaveBeenCalled();
+  });
+
+  it('returns null and warns when a v3 transaction is malformed', async () => {
+    await AsyncStorage.setItem(
+      'app-state',
+      JSON.stringify({
+        ...v3State,
+        transactions: [
+          {
+            id: 1,
+            amountCents: '4250',
+            account: { name: 'X', iban: 'Y' },
+          },
+        ],
       }),
     );
     expect(await loadState()).toBeNull();

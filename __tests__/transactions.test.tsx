@@ -57,7 +57,12 @@ describe('transactions state', () => {
       id: expect.any(Number),
       amountCents: 1050,
       account: { name: 'John Doe', iban: 'GB29NWBK60161331926819' },
+      createdAt: expect.any(String),
     });
+    // The timestamp is a parseable ISO 8601 value.
+    expect(Number.isNaN(Date.parse(context.transactions[0].createdAt))).toBe(
+      false,
+    );
   });
 
   it('rejects an overdraft and changes nothing', async () => {
