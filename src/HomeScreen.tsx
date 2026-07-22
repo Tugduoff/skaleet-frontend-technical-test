@@ -2,13 +2,15 @@ import React from 'react';
 import { View, Text, Button, FlatList, StyleSheet } from 'react-native';
 
 import { useHomeScreen } from './hooks/useHomeScreen';
+import { formatDate } from './utils/date';
 import type { RootStackParamList, Transaction } from './types';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Home'>;
 
 const HomeScreen = ({ navigation }: Props) => {
-  const { transactions, balanceCents, formatAmount } = useHomeScreen();
+  const { transactions, balanceCents, formatAmount, confirmReset } =
+    useHomeScreen();
 
   const renderItem = ({ item }: { item: Transaction }) => (
     <View style={styles.item}>
@@ -22,6 +24,7 @@ const HomeScreen = ({ navigation }: Props) => {
           <Text style={styles.itemText}>IBAN: {item.account.iban}</Text>
         </>
       )}
+      <Text style={styles.itemText}>Date: {formatDate(item.createdAt)}</Text>
     </View>
   );
 
@@ -38,6 +41,7 @@ const HomeScreen = ({ navigation }: Props) => {
         title="Beneficiaries"
         onPress={() => navigation.navigate('Beneficiaries')}
       />
+      <Button title="Reset demo data" onPress={confirmReset} />
       <FlatList
         data={transactions}
         keyExtractor={item => item.id.toString()}

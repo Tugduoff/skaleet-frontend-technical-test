@@ -35,6 +35,11 @@ interface TransactionContextValue {
    */
   updateBeneficiary: (id: number, input: BeneficiaryInput) => boolean;
   deleteBeneficiary: (id: number) => void;
+  /**
+   * Restores the initial demo state: initial balance, no transactions,
+   * no beneficiaries. Persisted by the usual save effect.
+   */
+  resetDemoData: () => void;
   isLoading: boolean;
 }
 
@@ -110,6 +115,7 @@ export const TransactionProvider = ({ children }: { children: ReactNode }) => {
         id: nextId(),
         amountCents,
         account: { ...account, iban: normalizeIban(account.iban) },
+        createdAt: new Date().toISOString(),
       },
     ]);
     return true;
@@ -166,6 +172,13 @@ export const TransactionProvider = ({ children }: { children: ReactNode }) => {
     );
   };
 
+  const resetDemoData = () => {
+    balanceRef.current = INITIAL_BALANCE_CENTS;
+    setBalanceCents(INITIAL_BALANCE_CENTS);
+    setTransactions([]);
+    setBeneficiaries([]);
+  };
+
   return (
     <TransactionContext.Provider
       value={{
@@ -176,6 +189,7 @@ export const TransactionProvider = ({ children }: { children: ReactNode }) => {
         addBeneficiary,
         updateBeneficiary,
         deleteBeneficiary,
+        resetDemoData,
         isLoading,
       }}>
       {children}

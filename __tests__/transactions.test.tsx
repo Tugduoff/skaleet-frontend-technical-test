@@ -57,7 +57,12 @@ describe('transactions state', () => {
       id: expect.any(Number),
       amountCents: 1050,
       account: { name: 'John Doe', iban: 'GB29NWBK60161331926819' },
+      createdAt: expect.any(String),
     });
+    // The timestamp is a parseable ISO 8601 value.
+    expect(Number.isNaN(Date.parse(context.transactions[0].createdAt))).toBe(
+      false,
+    );
   });
 
   it('rejects an overdraft and changes nothing', async () => {
@@ -107,5 +112,31 @@ describe('transactions state', () => {
     });
     const [first, second] = context.transactions;
     expect(second.id).toBeGreaterThan(first.id);
+  });
+
+  it('resets the demo data to the initial state', async () => {
+    await renderProvider();
+    act(() => {
+      context.addTransaction('10', ACCOUNT);
+      context.addBeneficiary({
+        firstName: 'John',
+        lastName: 'Doe',
+        iban: ACCOUNT.iban,
+      });
+    });
+    expect(context.balanceCents).not.toBe(INITIAL_BALANCE_CENTS);
+    act(() => {
+      context.resetDemoData();
+    });
+    expect(context.balanceCents).toBe(INITIAL_BALANCE_CENTS);
+    expect(context.transactions).toEqual([]);
+    expect(context.beneficiaries).toEqual([]);
+    // The balance ref is restored too: a new transaction validates against
+    // the initial balance, not the pre-reset one.
+    let accepted = false;
+    act(() => {
+      accepted = context.addTransaction('999', ACCOUNT);
+    });
+    expect(accepted).toBe(true);
   });
 });
