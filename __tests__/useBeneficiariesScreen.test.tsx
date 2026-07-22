@@ -1,17 +1,30 @@
 import React from 'react';
+import { Alert } from 'react-native';
 import renderer, { act } from 'react-test-renderer';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { beforeEach, describe, expect, it } from '@jest/globals';
+import {
+  afterEach,
+  beforeEach,
+  describe,
+  expect,
+  it,
+  jest,
+} from '@jest/globals';
 
-import { TransactionProvider } from '../src/TransactionContext';
+import {
+  TransactionProvider,
+  useTransactions,
+} from '../src/TransactionContext';
 import { useBeneficiariesScreen } from '../src/hooks/useBeneficiariesScreen';
 
 const VALID_IBAN = 'GB29 NWBK 6016 1331 9268 19';
 
 let hook: ReturnType<typeof useBeneficiariesScreen>;
+let context: ReturnType<typeof useTransactions>;
 
 const Probe = () => {
   hook = useBeneficiariesScreen();
+  context = useTransactions();
   return null;
 };
 
@@ -26,80 +39,52 @@ const renderHook = async () => {
 };
 
 describe('useBeneficiariesScreen', () => {
+  let alertSpy: jest.SpiedFunction<typeof Alert.alert>;
+
   beforeEach(async () => {
+    alertSpy = jest.spyOn(Alert, 'alert').mockImplementation(() => undefined);
     await AsyncStorage.clear();
   });
 
-  it('starts with empty form state', async () => {
-    await renderHook();
-    expect(hook.beneficiaries).toEqual([]);
-    expect(hook.name).toBe('');
-    expect(hook.iban).toBe('');
-    expect(hook.nameError).toBe('');
-    expect(hook.ibanError).toBe('');
+  afterEach(() => {
+    alertSpy.mockRestore();
   });
 
-  it('rejects empty name', async () => {
+  it('exposes the beneficiaries', async () => {
     await renderHook();
-    act(() => {
-      hook.setIban(VALID_IBAN);
-    });
-    act(() => {
-      hook.handleAdd();
-    });
-    expect(hook.nameError).toBe('Please enter a name');
     expect(hook.beneficiaries).toEqual([]);
-  });
-
-  it('rejects invalid IBAN', async () => {
-    await renderHook();
     act(() => {
-      hook.setName('John Doe');
-      hook.setIban('invalid');
+      context.addBeneficiary({
+        firstName: 'John',
+        lastName: 'Doe',
+        iban: VALID_IBAN,
+      });
     });
-    act(() => {
-      hook.handleAdd();
-    });
-    expect(hook.ibanError).toBe('Please enter a valid IBAN');
-    expect(hook.beneficiaries).toEqual([]);
-  });
-
-  it('rejects a duplicate IBAN', async () => {
-    await renderHook();
-    act(() => {
-      hook.setName('John Doe');
-      hook.setIban(VALID_IBAN);
-    });
-    act(() => {
-      hook.handleAdd();
-    });
-    expect(hook.beneficiaries).toHaveLength(1);
-
-    act(() => {
-      hook.setName('Jane Doe');
-      hook.setIban(VALID_IBAN);
-    });
-    act(() => {
-      hook.handleAdd();
-    });
-    expect(hook.ibanError).toBe('This beneficiary already exists');
     expect(hook.beneficiaries).toHaveLength(1);
   });
 
-  it('adds a beneficiary and clears the form', async () => {
+  it('confirmDelete asks for confirmation and deletes on confirm', async () => {
     await renderHook();
     act(() => {
-      hook.setName('John Doe');
-      hook.setIban(VALID_IBAN);
+      context.addBeneficiary({
+        firstName: 'John',
+        lastName: 'Doe',
+        iban: VALID_IBAN,
+      });
     });
     act(() => {
-      hook.handleAdd();
+      hook.confirmDelete(hook.beneficiaries[0]);
     });
-    expect(hook.nameError).toBe('');
-    expect(hook.ibanError).toBe('');
-    expect(hook.name).toBe('');
-    expect(hook.iban).toBe('');
-    expect(hook.beneficiaries).toHaveLength(1);
-    expect(hook.beneficiaries[0].name).toBe('John Doe');
+    expect(alertSpy).toHaveBeenCalledWith(
+      'Delete beneficiary',
+      'Remove John Doe from your beneficiaries?',
+      expect.any(Array),
+    );
+    const buttons = alertSpy.mock.calls[0][2];
+    const deleteButton = buttons?.find(button => button.text === 'Delete');
+    act(() => {
+      deleteButton?.onPress?.();
+    });
+    expect(hook.beneficiaries).toHaveLength(0);
   });
 });

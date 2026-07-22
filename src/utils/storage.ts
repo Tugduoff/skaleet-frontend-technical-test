@@ -1,9 +1,10 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
+import { splitFullName } from './beneficiaries';
 import type { Account, Beneficiary, Transaction } from '../types';
 
 const STORAGE_KEY = 'app-state';
-const STORAGE_VERSION = 2;
+const STORAGE_VERSION = 3;
 
 export interface PersistedState {
   version: number;
@@ -20,6 +21,13 @@ interface TransactionV1 {
   account: Account;
 }
 
+/** Schema v1/v2 beneficiary: single free-form name field. */
+interface BeneficiaryV2 {
+  id: number;
+  name: string;
+  iban: string;
+}
+
 /**
  * Schema v1 persisted state: balance and amounts stored as fractional
  * major units (dollars).
@@ -28,7 +36,18 @@ interface PersistedStateV1 {
   version: 1;
   transactions: TransactionV1[];
   balance: number;
-  beneficiaries: Beneficiary[];
+  beneficiaries: BeneficiaryV2[];
+}
+
+/**
+ * Schema v2 persisted state: integer cents, beneficiaries with a single
+ * free-form name.
+ */
+interface PersistedStateV2 {
+  version: 2;
+  transactions: Transaction[];
+  balanceCents: number;
+  beneficiaries: BeneficiaryV2[];
 }
 
 /** Returns true when value is a non-negative safe integer. */
@@ -76,6 +95,33 @@ const isValidTransactionV1 = (value: unknown): value is TransactionV1 => {
   );
 };
 
+/** Type guard validating the persisted shape of a Beneficiary record. */
+const isValidBeneficiary = (value: unknown): value is Beneficiary => {
+  if (typeof value !== 'object' || value === null) {
+    return false;
+  }
+  const beneficiary = value as Record<string, unknown>;
+  return (
+    typeof beneficiary.id === 'number' &&
+    typeof beneficiary.firstName === 'string' &&
+    typeof beneficiary.lastName === 'string' &&
+    typeof beneficiary.iban === 'string'
+  );
+};
+
+/** Type guard validating the persisted shape of a v1/v2 Beneficiary record. */
+const isValidBeneficiaryV2 = (value: unknown): value is BeneficiaryV2 => {
+  if (typeof value !== 'object' || value === null) {
+    return false;
+  }
+  const beneficiary = value as Record<string, unknown>;
+  return (
+    typeof beneficiary.id === 'number' &&
+    typeof beneficiary.name === 'string' &&
+    typeof beneficiary.iban === 'string'
+  );
+};
+
 /**
  * Type guard validating the persisted state object. Also defends against
  * corrupted numeric values that would break the integer-cents invariant.
@@ -90,7 +136,8 @@ const isPersistedState = (parsed: unknown): parsed is PersistedState => {
     Array.isArray(state.transactions) &&
     state.transactions.every(isValidTransaction) &&
     isNonNegativeSafeInteger(state.balanceCents) &&
-    Array.isArray(state.beneficiaries)
+    Array.isArray(state.beneficiaries) &&
+    state.beneficiaries.every(isValidBeneficiary)
   );
 };
 
@@ -105,7 +152,24 @@ const isPersistedStateV1 = (parsed: unknown): parsed is PersistedStateV1 => {
     Array.isArray(state.transactions) &&
     state.transactions.every(isValidTransactionV1) &&
     typeof state.balance === 'number' &&
-    Array.isArray(state.beneficiaries)
+    Array.isArray(state.beneficiaries) &&
+    state.beneficiaries.every(isValidBeneficiaryV2)
+  );
+};
+
+/** Type guard validating a v2 persisted state object. */
+const isPersistedStateV2 = (parsed: unknown): parsed is PersistedStateV2 => {
+  if (typeof parsed !== 'object' || parsed === null) {
+    return false;
+  }
+  const state = parsed as Record<string, unknown>;
+  return (
+    state.version === 2 &&
+    Array.isArray(state.transactions) &&
+    state.transactions.every(isValidTransaction) &&
+    isNonNegativeSafeInteger(state.balanceCents) &&
+    Array.isArray(state.beneficiaries) &&
+    state.beneficiaries.every(isValidBeneficiaryV2)
   );
 };
 
@@ -122,7 +186,7 @@ const getVersion = (value: unknown): number | null => {
  * Migrates a validated v1 payload to the v2 schema: fractional major units
  * become integer cents, rounded to the nearest cent.
  */
-const migrateV1toV2 = (state: PersistedStateV1): PersistedState => ({
+const migrateV1toV2 = (state: PersistedStateV1): PersistedStateV2 => ({
   version: 2,
   transactions: state.transactions.map(tx => ({
     id: tx.id,
@@ -134,12 +198,28 @@ const migrateV1toV2 = (state: PersistedStateV1): PersistedState => ({
 });
 
 /**
+ * Migrates a validated v2 payload to the v3 schema: the beneficiary name
+ * is split into firstName and lastName on the first whitespace.
+ */
+const migrateV2toV3 = (state: PersistedStateV2): PersistedState => ({
+  version: 3,
+  transactions: state.transactions,
+  balanceCents: state.balanceCents,
+  beneficiaries: state.beneficiaries.map(beneficiary => ({
+    id: beneficiary.id,
+    ...splitFullName(beneficiary.name),
+    iban: beneficiary.iban,
+  })),
+});
+
+/**
  * Migration chain keyed by the schema version it upgrades from. Each entry
  * validates its input and returns the next version's payload, or null when
  * the input does not match the expected schema.
  */
 const MIGRATIONS: Record<number, (state: unknown) => unknown | null> = {
   1: state => (isPersistedStateV1(state) ? migrateV1toV2(state) : null),
+  2: state => (isPersistedStateV2(state) ? migrateV2toV3(state) : null),
 };
 
 /**

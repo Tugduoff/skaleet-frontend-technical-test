@@ -3,7 +3,10 @@ import { useRef, useState } from 'react';
 import { useTransactions } from '../TransactionContext';
 import { getAmountError } from '../utils/amount';
 import { isValidIban } from '../utils/iban';
-import { getSelectedBeneficiary } from '../utils/beneficiaries';
+import {
+  getBeneficiaryFullName,
+  getSelectedBeneficiary,
+} from '../utils/beneficiaries';
 import type { Account } from '../types';
 
 /**
@@ -58,7 +61,7 @@ export const useTransactionScreen = () => {
       account = { name: name.trim(), iban };
     } else if (selectedBeneficiary) {
       account = {
-        name: selectedBeneficiary.name,
+        name: getBeneficiaryFullName(selectedBeneficiary),
         iban: selectedBeneficiary.iban,
       };
     }

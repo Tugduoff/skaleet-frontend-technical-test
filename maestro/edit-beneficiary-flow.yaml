@@ -1,0 +1,27 @@
+appId: com.skaleetfrontendtechnicaltest
+---
+# Edit flow: create a beneficiary, rename it, and verify the list updates.
+- launchApp:
+    clearState: true
+- tapOn: 'Beneficiaries'
+- tapOn: 'Add Beneficiary'
+- tapOn: 'First name'
+- inputText: 'John'
+- hideKeyboard
+- tapOn: 'Last name'
+- inputText: 'Doe'
+- hideKeyboard
+- tapOn: 'IBAN'
+- inputText: 'GB29 NWBK 6016 1331 9268 19'
+- hideKeyboard
+- tapOn: 'Save Beneficiary'
+- assertVisible: 'John Doe'
+- tapOn: 'Edit'
+# The form is prefilled, so fields are matched by their current value.
+- tapOn: 'Doe'
+- eraseText
+- inputText: 'Smith'
+- hideKeyboard
+- tapOn: 'Save Beneficiary'
+- assertVisible: 'John Smith'
+- assertNotVisible: 'John Doe'

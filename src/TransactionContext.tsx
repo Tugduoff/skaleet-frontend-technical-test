@@ -12,6 +12,12 @@ import { normalizeIban } from './utils/iban';
 import { loadState, saveState } from './utils/storage';
 import type { Account, Beneficiary, Transaction } from './types';
 
+interface BeneficiaryInput {
+  firstName: string;
+  lastName: string;
+  iban: string;
+}
+
 interface TransactionContextValue {
   transactions: Transaction[];
   /** Current balance in integer cents. */
@@ -22,7 +28,13 @@ interface TransactionContextValue {
    */
   addTransaction: (amount: string, account: Account) => boolean;
   beneficiaries: Beneficiary[];
-  addBeneficiary: (name: string, iban: string) => void;
+  addBeneficiary: (input: BeneficiaryInput) => void;
+  /**
+   * Updates an existing beneficiary. Returns false and changes nothing when
+   * another beneficiary already uses the IBAN.
+   */
+  updateBeneficiary: (id: number, input: BeneficiaryInput) => boolean;
+  deleteBeneficiary: (id: number) => void;
   isLoading: boolean;
 }
 
@@ -103,9 +115,9 @@ export const TransactionProvider = ({ children }: { children: ReactNode }) => {
     return true;
   };
 
-  const addBeneficiary = (name: string, iban: string) => {
+  const addBeneficiary = (input: BeneficiaryInput) => {
     setBeneficiaries(prevBeneficiaries => {
-      const normalizedIban = normalizeIban(iban);
+      const normalizedIban = normalizeIban(input.iban);
       const isDuplicate = prevBeneficiaries.some(
         beneficiary => beneficiary.iban === normalizedIban,
       );
@@ -114,9 +126,44 @@ export const TransactionProvider = ({ children }: { children: ReactNode }) => {
       }
       return [
         ...prevBeneficiaries,
-        { id: nextId(), name, iban: normalizedIban },
+        {
+          id: nextId(),
+          firstName: input.firstName,
+          lastName: input.lastName,
+          iban: normalizedIban,
+        },
       ];
     });
+  };
+
+  const updateBeneficiary = (id: number, input: BeneficiaryInput): boolean => {
+    const normalizedIban = normalizeIban(input.iban);
+    const isDuplicate = beneficiaries.some(
+      beneficiary =>
+        beneficiary.id !== id && beneficiary.iban === normalizedIban,
+    );
+    if (isDuplicate) {
+      return false;
+    }
+    setBeneficiaries(prevBeneficiaries =>
+      prevBeneficiaries.map(beneficiary =>
+        beneficiary.id === id
+          ? {
+              ...beneficiary,
+              firstName: input.firstName,
+              lastName: input.lastName,
+              iban: normalizedIban,
+            }
+          : beneficiary,
+      ),
+    );
+    return true;
+  };
+
+  const deleteBeneficiary = (id: number) => {
+    setBeneficiaries(prevBeneficiaries =>
+      prevBeneficiaries.filter(beneficiary => beneficiary.id !== id),
+    );
   };
 
   return (
@@ -127,6 +174,8 @@ export const TransactionProvider = ({ children }: { children: ReactNode }) => {
         balanceCents,
         beneficiaries,
         addBeneficiary,
+        updateBeneficiary,
+        deleteBeneficiary,
         isLoading,
       }}>
       {children}
