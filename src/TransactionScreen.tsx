@@ -45,6 +45,7 @@ const TransactionScreen = ({ navigation }: Props) => {
       {amountError ? <Text style={styles.error}>{amountError}</Text> : null}
       {beneficiaries.length > 0 && (
         <Picker
+          testID="beneficiary-picker"
           selectedValue={useManualEntry ? 'manual' : selectedBeneficiary?.id}
           onValueChange={(value: number | 'manual') => setSelection(value)}
           style={styles.picker}>

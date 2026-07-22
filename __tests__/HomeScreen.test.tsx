@@ -17,9 +17,9 @@ const buildNavigation = () => ({
   navigate: jest.fn(),
 });
 
-const renderScreen = () => {
+const renderScreen = async () => {
   const navigation = buildNavigation();
-  render(
+  await render(
     <TransactionProvider>
       <HomeScreen
         navigation={navigation as unknown as Navigation}
@@ -36,7 +36,7 @@ describe('HomeScreen', () => {
   });
 
   it('shows the initial balance', async () => {
-    renderScreen();
+    await renderScreen();
     expect(await screen.findByText('Current Balance: $1000.00')).toBeTruthy();
   });
 
@@ -56,7 +56,7 @@ describe('HomeScreen', () => {
         beneficiaries: [],
       }),
     );
-    renderScreen();
+    await renderScreen();
     expect(await screen.findByText('Current Balance: $957.50')).toBeTruthy();
     expect(screen.getByText('Amount: $42.50')).toBeTruthy();
     expect(screen.getByText('To: John Doe')).toBeTruthy();
@@ -64,7 +64,7 @@ describe('HomeScreen', () => {
   });
 
   it('navigates to the transaction and beneficiaries screens', async () => {
-    const navigation = renderScreen();
+    const navigation = await renderScreen();
     await screen.findByText('Add Transaction');
     fireEvent.press(screen.getByText('Add Transaction'));
     expect(navigation.navigate).toHaveBeenCalledWith('Transaction');

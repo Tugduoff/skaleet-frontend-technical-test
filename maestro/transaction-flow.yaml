@@ -7,6 +7,7 @@ appId: com.skaleetfrontendtechnicaltest
 - tapOn: 'Beneficiaries'
 - tapOn: 'Beneficiary name'
 - inputText: 'John Doe'
+- hideKeyboard
 - tapOn: 'Beneficiary IBAN'
 - inputText: 'GB29 NWBK 6016 1331 9268 19'
 - hideKeyboard
