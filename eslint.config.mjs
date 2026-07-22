@@ -1,21 +1,12 @@
-import globals from 'globals';
-import pluginJs from '@eslint/js';
-import tseslint from 'typescript-eslint';
-import pluginReact from 'eslint-plugin-react';
+import rnConfig from '@react-native/eslint-config/flat';
 
 export default [
   { ignores: ['coverage/', 'node_modules/', 'android/', 'ios/'] },
-  { files: ['**/*.{js,mjs,cjs,ts,jsx,tsx}'] },
-  { languageOptions: { globals: globals.browser } },
-  pluginJs.configs.recommended,
-  ...tseslint.configs.recommended,
-  pluginReact.configs.flat.recommended,
+  ...rnConfig,
   {
-    files: ['*.config.js', '.eslintrc.js', '.prettierrc.js', 'jest/**/*.js'],
-    languageOptions: { globals: { ...globals.node, ...globals.jest } },
-    rules: { '@typescript-eslint/no-require-imports': 'off' },
-  },
-  {
-    settings: { react: { version: 'detect' } },
+    rules: {
+      // Dynamic safe-area insets are applied inline on purpose.
+      'react-native/no-inline-styles': 'off',
+    },
   },
 ];
