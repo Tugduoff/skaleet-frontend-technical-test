@@ -62,5 +62,10 @@
     "*.{json,md}": [
       "prettier --write"
     ]
+  },
+  "overrides": {
+    "@react-native/eslint-config": {
+      "eslint-plugin-ft-flow": "^3.0.11"
+    }
   }
 }
