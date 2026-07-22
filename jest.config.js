@@ -1,12 +1,11 @@
 module.exports = {
-  preset: 'react-native',
+  preset: '@react-native/jest-preset',
   transformIgnorePatterns: [
-    'node_modules/(?!(jest-)?react-native|@react-native(-community)?|@react-navigation|@react-native-async-storage)/',
+    'node_modules/(?!((jest-)?react-native|@react-native(-community)?|@react-native-async-storage|@react-navigation)/)',
   ],
-  setupFiles: ['react-native/jest/setup.js', './jest/setup.js'],
   moduleNameMapper: {
     '^@react-native-async-storage/async-storage$':
-      '@react-native-async-storage/async-storage/jest/async-storage-mock',
+      '@react-native-async-storage/async-storage/jest',
   },
   collectCoverageFrom: ['src/**/*.{ts,tsx}'],
   coverageThreshold: {

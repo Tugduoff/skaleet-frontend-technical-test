@@ -33,6 +33,7 @@ const BeneficiariesScreen = () => {
   return (
     <View style={styles.container}>
       <FlatList
+        style={styles.list}
         data={beneficiaries}
         keyExtractor={item => item.id.toString()}
         renderItem={renderItem}
@@ -64,6 +65,9 @@ const BeneficiariesScreen = () => {
 
 const styles = StyleSheet.create({
   container: {
+    flex: 1,
+  },
+  list: {
     flex: 1,
   },
   listContainer: {
