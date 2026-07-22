@@ -24,10 +24,10 @@ appId: com.skaleetfrontendtechnicaltest
 - hideKeyboard
 # The beneficiary just created is the picker's default selection.
 - tapOn: 'Submit Transaction'
-- assertVisible: 'Current Balance: $989.50'
-- assertVisible: 'Amount: $10.50'
+- assertVisible: 'Current Balance: €989.50'
+- assertVisible: 'Amount: €10.50'
 - assertVisible: 'To: John Doe'
 - stopApp
 - launchApp
-- assertVisible: 'Current Balance: $989.50'
+- assertVisible: 'Current Balance: €989.50'
 - assertVisible: 'To: John Doe'

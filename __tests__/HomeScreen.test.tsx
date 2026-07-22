@@ -41,7 +41,7 @@ describe('HomeScreen', () => {
 
   it('shows the initial balance', async () => {
     await renderScreen();
-    expect(await screen.findByText('Current Balance: $1000.00')).toBeTruthy();
+    expect(await screen.findByText('Current Balance: €1,000.00')).toBeTruthy();
   });
 
   it('shows an empty state when there are no transactions', async () => {
@@ -66,8 +66,8 @@ describe('HomeScreen', () => {
       }),
     );
     await renderScreen();
-    expect(await screen.findByText('Current Balance: $957.50')).toBeTruthy();
-    expect(screen.getByText('Amount: $42.50')).toBeTruthy();
+    expect(await screen.findByText('Current Balance: €957.50')).toBeTruthy();
+    expect(screen.getByText('Amount: €42.50')).toBeTruthy();
     expect(screen.getByText('To: John Doe')).toBeTruthy();
     expect(screen.getByText('IBAN: GB29NWBK60161331926819')).toBeTruthy();
   });
@@ -135,7 +135,7 @@ describe('HomeScreen', () => {
         />
       </TransactionProvider>,
     );
-    await screen.findByText('Current Balance: $1000.00');
+    await screen.findByText('Current Balance: €1,000.00');
     // Drive the state through the context rather than seeding storage:
     // deterministic regardless of writes in flight from earlier tests.
     await act(async () => {
@@ -144,7 +144,7 @@ describe('HomeScreen', () => {
         iban: 'GB29 NWBK 6016 1331 9268 19',
       });
     });
-    await screen.findByText('Current Balance: $957.50');
+    await screen.findByText('Current Balance: €957.50');
     const user = userEvent.setup();
     await user.press(screen.getByText('Reset demo data'));
     expect(alertSpy).toHaveBeenCalledWith(
@@ -157,7 +157,7 @@ describe('HomeScreen', () => {
     await act(async () => {
       confirm?.onPress?.();
     });
-    expect(await screen.findByText('Current Balance: $1000.00')).toBeTruthy();
+    expect(await screen.findByText('Current Balance: €1,000.00')).toBeTruthy();
     expect(await screen.findByText('No transactions yet')).toBeTruthy();
     alertSpy.mockRestore();
   });

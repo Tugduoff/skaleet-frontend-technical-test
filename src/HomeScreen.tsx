@@ -22,7 +22,7 @@ const HomeScreen = ({ navigation }: Props) => {
         {t('home.transactionId', { id: String(item.id) })}
       </Text>
       <Text style={styles.itemText}>
-        {t('home.amount', { amount: `$${formatAmount(item.amountCents)}` })}
+        {t('home.amount', { amount: formatAmount(item.amountCents) })}
       </Text>
       <Text style={styles.itemText}>
         {t('home.to', { name: item.account.name })}
@@ -39,7 +39,7 @@ const HomeScreen = ({ navigation }: Props) => {
   return (
     <View style={[styles.container, { paddingBottom: insets.bottom }]}>
       <Text style={styles.balanceText}>
-        {t('home.balance', { amount: `$${formatAmount(balanceCents)}` })}
+        {t('home.balance', { amount: formatAmount(balanceCents) })}
       </Text>
       <Button
         title={t('home.addTransaction')}

@@ -17,13 +17,13 @@ appId: com.skaleetfrontendtechnicaltest
 - tapOn: 'Submit Transaction'
 # Decline saving the recipient; back on Home with the transaction applied.
 - tapOn: 'No thanks'
-- assertVisible: 'Current Balance: $990.00'
+- assertVisible: 'Current Balance: €990.00'
 - tapOn: 'Reset demo data'
 - assertVisible: 'Restore the initial balance and clear all transactions and beneficiaries?'
 - tapOn: 'Cancel'
-- assertVisible: 'Current Balance: $990.00'
+- assertVisible: 'Current Balance: €990.00'
 - tapOn: 'Reset demo data'
 # While the alert is open only the dialog is in the hierarchy.
 - tapOn: 'Reset'
-- assertVisible: 'Current Balance: $1000.00'
+- assertVisible: 'Current Balance: €1,000.00'
 - assertVisible: 'No transactions yet'
