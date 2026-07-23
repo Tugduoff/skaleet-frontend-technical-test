@@ -301,7 +301,6 @@ const styles = StyleSheet.create({
   },
   amountCurrency: {
     ...typography.hero,
-    fontSize: 32,
     color: colors.accent,
     marginRight: spacing.sm,
   },
@@ -359,7 +358,6 @@ const styles = StyleSheet.create({
   },
   recipientName: {
     ...typography.captionMedium,
-    fontSize: 12,
     color: colors.ink,
     textAlign: 'center',
     // Ring width (56 avatar + padding + border), so the name stays

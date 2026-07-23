@@ -60,19 +60,19 @@ export const radius = {
 
 export const typography = {
   display: {
-    fontSize: 34,
+    fontSize: 28,
     fontWeight: '700',
     letterSpacing: -0.5,
   },
   /** The balance / amount hero — oversized, tight tracking, tabular digits. */
   hero: {
-    fontSize: 44,
+    fontSize: 32,
     fontWeight: '700',
     letterSpacing: -1,
     fontVariant: ['tabular-nums'],
   },
-  heading: { fontSize: 20, fontWeight: '700' },
-  title: { fontSize: 16, fontWeight: '600' },
+  heading: { fontSize: 18, fontWeight: '700' },
+  title: { fontSize: 15, fontWeight: '600' },
   body: { fontSize: 15, fontWeight: '400' },
   bodyMedium: { fontSize: 15, fontWeight: '500' },
   caption: { fontSize: 13, fontWeight: '400' },

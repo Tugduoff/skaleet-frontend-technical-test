@@ -109,6 +109,5 @@ const styles = StyleSheet.create({
   },
   tabLabel: {
     ...typography.captionMedium,
-    fontSize: 12,
   },
 });

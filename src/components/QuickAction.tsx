@@ -49,7 +49,7 @@ export const QuickAction = ({
 const styles = StyleSheet.create({
   container: {
     alignItems: 'center',
-    width: 76,
+    width: 92,
     gap: spacing.sm,
   },
   disc: {
@@ -61,7 +61,6 @@ const styles = StyleSheet.create({
   },
   label: {
     ...typography.captionMedium,
-    fontSize: 12,
     color: colors.ink,
     textAlign: 'center',
   },
