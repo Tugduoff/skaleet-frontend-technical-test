@@ -2,7 +2,7 @@ module.exports = {
   preset: '@react-native/jest-preset',
   setupFiles: ['<rootDir>/jest/setup.ts'],
   transformIgnorePatterns: [
-    'node_modules/(?!((jest-)?react-native|@react-native(-community)?|@react-native-async-storage|@react-navigation|react-native-safe-area-context)/)',
+    'node_modules/(?!((jest-)?react-native|@react-native(-community)?|@react-native-async-storage|@react-navigation|react-native-safe-area-context|phosphor-react-native|react-native-svg)/)',
   ],
   moduleNameMapper: {
     '^@react-native-async-storage/async-storage$':

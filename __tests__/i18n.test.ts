@@ -15,7 +15,9 @@ describe('i18n', () => {
   });
 
   it('interpolates placeholders', () => {
-    expect(t('home.to', { name: 'John' })).toBe('To: John');
+    expect(t('beneficiaries.deleteMessage', { name: 'John' })).toBe(
+      'Remove John from your beneficiaries?',
+    );
     expect(t('transaction.saveMessage', { name: 'Jane' })).toBe(
       'Add Jane to your beneficiaries?',
     );

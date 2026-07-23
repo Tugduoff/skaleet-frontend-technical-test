@@ -19,10 +19,16 @@ export interface Transaction {
   createdAt: string;
 }
 
-export type RootStackParamList = {
+/** Main sections, reachable from the bottom tab bar. */
+export type RootTabParamList = {
   Home: undefined;
   Transaction: undefined;
   Beneficiaries: undefined;
+};
+
+/** Root stack: the tabs, plus full-screen flows pushed on top of them. */
+export type RootStackParamList = {
+  Tabs: undefined;
   BeneficiaryForm:
     | {
         /** Present to edit an existing beneficiary, absent to create one. */

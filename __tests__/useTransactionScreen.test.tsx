@@ -153,4 +153,70 @@ describe('useTransactionScreen', () => {
       iban: VALID_IBAN_NORMALIZED,
     });
   });
+
+  it('clears a shown amount error only when the input no longer fails', async () => {
+    await renderHook();
+    // Fresh balance is €1,000: €1,001 triggers the exceeds-balance error.
+    act(() => {
+      hook.setAmount('1001');
+    });
+    act(() => {
+      hook.submit();
+    });
+    expect(hook.amountError).toBe('Amount exceeds current balance');
+    // Still invalid: the error stays.
+    act(() => {
+      hook.setAmount('2000');
+    });
+    expect(hook.amountError).toBe('Amount exceeds current balance');
+    // Valid again: the error clears live.
+    act(() => {
+      hook.setAmount('10');
+    });
+    expect(hook.amountError).toBe('');
+    // Re-trigger, then empty the field: clears as well (the CTA hides at 0).
+    act(() => {
+      hook.setAmount('1001');
+    });
+    act(() => {
+      hook.submit();
+    });
+    expect(hook.amountError).toBe('Amount exceeds current balance');
+    act(() => {
+      hook.setAmount('');
+    });
+    expect(hook.amountError).toBe('');
+  });
+
+  it('allows a new transaction once the previous submit has settled', async () => {
+    await renderHook();
+    act(() => {
+      hook.setAmount('10');
+      hook.setName('John Doe');
+      hook.setIban(VALID_IBAN);
+    });
+    let first = false;
+    act(() => {
+      first = hook.submit();
+    });
+    expect(first).toBe(true);
+    expect(context.transactions).toHaveLength(1);
+    // The re-entry guard releases on the next tick; the form was cleared.
+    await act(async () => {
+      await new Promise(resolve => {
+        setTimeout(resolve, 10);
+      });
+    });
+    act(() => {
+      hook.setAmount('5');
+      hook.setName('Jane Doe');
+      hook.setIban(VALID_IBAN);
+    });
+    let second = false;
+    act(() => {
+      second = hook.submit();
+    });
+    expect(second).toBe(true);
+    expect(context.transactions).toHaveLength(2);
+  });
 });

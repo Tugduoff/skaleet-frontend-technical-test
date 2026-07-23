@@ -4,7 +4,6 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import {
   render,
   screen,
-  fireEvent,
   userEvent,
   waitFor,
 } from '@testing-library/react-native';
@@ -16,17 +15,19 @@ import {
   it,
   jest,
 } from '@jest/globals';
+import type { CompositeScreenProps } from '@react-navigation/native';
+import type { BottomTabScreenProps } from '@react-navigation/bottom-tabs';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 
 import TransactionScreen from '../src/TransactionScreen';
 import { TransactionProvider } from '../src/TransactionContext';
-import type { RootStackParamList } from '../src/types';
+import type { RootStackParamList, RootTabParamList } from '../src/types';
 
 const VALID_IBAN = 'GB29 NWBK 6016 1331 9268 19';
 
-type Navigation = NativeStackScreenProps<
-  RootStackParamList,
-  'Transaction'
+type Navigation = CompositeScreenProps<
+  BottomTabScreenProps<RootTabParamList, 'Transaction'>,
+  NativeStackScreenProps<RootStackParamList>
 >['navigation'];
 
 const seedBeneficiary = () =>
@@ -48,7 +49,7 @@ const seedBeneficiary = () =>
   );
 
 const renderScreen = async () => {
-  const navigation = { goBack: jest.fn(), replace: jest.fn() };
+  const navigation = { navigate: jest.fn(), goBack: jest.fn() };
   await render(
     <TransactionProvider>
       <TransactionScreen
@@ -67,7 +68,7 @@ const renderScreen = async () => {
 const submitManualTransaction = async (
   user: ReturnType<typeof userEvent.setup>,
 ) => {
-  await user.type(screen.getByPlaceholderText('Enter amount'), '10.50');
+  await user.type(screen.getByPlaceholderText('0.00'), '10.50');
   await user.type(screen.getByPlaceholderText('Recipient Name'), 'John Doe');
   await user.type(screen.getByPlaceholderText('Recipient IBAN'), VALID_IBAN);
   await user.press(screen.getByText('Submit Transaction'));
@@ -94,18 +95,25 @@ describe('TransactionScreen', () => {
     ).toBeTruthy();
   });
 
-  it('rejects an empty amount', async () => {
+  it('hides the submit button until amount and manual recipient are filled', async () => {
     const user = userEvent.setup();
-    const navigation = await renderScreen();
-    await user.press(await screen.findByText('Submit Transaction'));
-    expect(await screen.findByText('Please enter an amount')).toBeTruthy();
-    expect(navigation.goBack).not.toHaveBeenCalled();
+    await renderScreen();
+    await screen.findByPlaceholderText('0.00');
+    expect(screen.queryByText('Submit Transaction')).toBeNull();
+    await user.type(screen.getByPlaceholderText('0.00'), '10');
+    // Amount alone is not enough: manual name and IBAN are still required.
+    expect(screen.queryByText('Submit Transaction')).toBeNull();
+    await user.type(screen.getByPlaceholderText('Recipient Name'), 'John Doe');
+    await user.type(screen.getByPlaceholderText('Recipient IBAN'), VALID_IBAN);
+    expect(await screen.findByText('Submit Transaction')).toBeTruthy();
   });
 
   it('rejects an amount exceeding the balance', async () => {
     const user = userEvent.setup();
     await renderScreen();
-    await user.type(screen.getByPlaceholderText('Enter amount'), '1001');
+    await user.type(screen.getByPlaceholderText('0.00'), '1001');
+    await user.type(screen.getByPlaceholderText('Recipient Name'), 'John Doe');
+    await user.type(screen.getByPlaceholderText('Recipient IBAN'), VALID_IBAN);
     await user.press(screen.getByText('Submit Transaction'));
     expect(
       await screen.findByText('Amount exceeds current balance'),
@@ -115,7 +123,7 @@ describe('TransactionScreen', () => {
   it('rejects an invalid recipient IBAN', async () => {
     const user = userEvent.setup();
     await renderScreen();
-    await user.type(screen.getByPlaceholderText('Enter amount'), '10');
+    await user.type(screen.getByPlaceholderText('0.00'), '10');
     await user.type(screen.getByPlaceholderText('Recipient Name'), 'John Doe');
     await user.type(
       screen.getByPlaceholderText('Recipient IBAN'),
@@ -139,8 +147,11 @@ describe('TransactionScreen', () => {
     const buttons = alertSpy.mock.calls[0][2];
     const decline = buttons?.find(button => button.text === 'No thanks');
     decline?.onPress?.();
-    expect(navigation.goBack).toHaveBeenCalledTimes(1);
-    expect(navigation.replace).not.toHaveBeenCalled();
+    expect(navigation.navigate).toHaveBeenCalledWith('Home');
+    expect(navigation.navigate).not.toHaveBeenCalledWith(
+      'BeneficiaryForm',
+      expect.anything(),
+    );
   });
 
   it('opens the prefilled beneficiary form on Save', async () => {
@@ -151,7 +162,7 @@ describe('TransactionScreen', () => {
     const buttons = alertSpy.mock.calls[0][2];
     const save = buttons?.find(button => button.text === 'Save');
     save?.onPress?.();
-    expect(navigation.replace).toHaveBeenCalledWith('BeneficiaryForm', {
+    expect(navigation.navigate).toHaveBeenCalledWith('BeneficiaryForm', {
       prefillFirstName: 'John',
       prefillLastName: 'Doe',
       prefillIban: VALID_IBAN,
@@ -159,26 +170,40 @@ describe('TransactionScreen', () => {
     expect(navigation.goBack).not.toHaveBeenCalled();
   });
 
-  it('shows the picker when beneficiaries exist and submits for the default selection', async () => {
+  it('adds quick amounts to the input', async () => {
+    const user = userEvent.setup();
+    await renderScreen();
+    await screen.findByPlaceholderText('0.00');
+    await user.press(screen.getByTestId('quick-add-1000'));
+    await user.press(screen.getByTestId('quick-add-5000'));
+    expect(screen.getByPlaceholderText('0.00').props.value).toBe('60.00');
+  });
+
+  it('shows recipient chips when beneficiaries exist and submits for the default selection', async () => {
     const user = userEvent.setup();
     await seedBeneficiary();
     const navigation = await renderScreen();
-    await screen.findByTestId('beneficiary-picker');
+    await screen.findByTestId('beneficiary-option-1');
     // Manual entry fields are hidden while a beneficiary is selected.
     expect(screen.queryByPlaceholderText('Recipient Name')).toBeNull();
-    await user.type(screen.getByPlaceholderText('Enter amount'), '10');
+    await user.type(screen.getByPlaceholderText('0.00'), '10');
     await user.press(screen.getByText('Submit Transaction'));
-    await waitFor(() => expect(navigation.goBack).toHaveBeenCalledTimes(1));
+    await waitFor(() =>
+      expect(navigation.navigate).toHaveBeenCalledWith('Home'),
+    );
     // A known recipient is not offered to be saved again.
     expect(alertSpy).not.toHaveBeenCalled();
   });
 
-  it('reveals manual entry when the picker is switched to manual', async () => {
+  it('reveals manual entry via the manual chip, and hides it again', async () => {
+    const user = userEvent.setup();
     await seedBeneficiary();
     await renderScreen();
-    const picker = await screen.findByTestId('beneficiary-picker');
-    fireEvent(picker, 'onValueChange', 'manual');
+    await screen.findByTestId('beneficiary-option-1');
+    await user.press(screen.getByTestId('beneficiary-option-manual'));
     expect(await screen.findByPlaceholderText('Recipient Name')).toBeTruthy();
     expect(screen.getByPlaceholderText('Recipient IBAN')).toBeTruthy();
+    await user.press(screen.getByTestId('beneficiary-option-1'));
+    expect(screen.queryByPlaceholderText('Recipient Name')).toBeNull();
   });
 });

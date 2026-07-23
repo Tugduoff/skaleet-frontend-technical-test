@@ -4,8 +4,16 @@ appId: com.skaleetfrontendtechnicaltest
 # beneficiary, the alert's Delete button removes it.
 - launchApp:
     clearState: true
-- tapOn: 'Beneficiaries'
-- tapOn: 'Add Beneficiary'
+# Cold starts on the emulator are slow (bundle fetch + storage init):
+# give the first screen up to 60s to appear before interacting.
+- extendedWaitUntil:
+    visible:
+      id: 'home-add-transaction'
+    timeout: 60000
+- tapOn:
+    id: 'tab-beneficiaries'
+- tapOn:
+    id: 'add-beneficiary'
 - tapOn: 'First name'
 - inputText: 'John'
 - hideKeyboard
@@ -17,11 +25,13 @@ appId: com.skaleetfrontendtechnicaltest
 - hideKeyboard
 - tapOn: 'Save Beneficiary'
 - assertVisible: 'John Doe'
-- tapOn: 'Delete'
+- tapOn:
+    id: 'beneficiary-delete-1'
 - assertVisible: 'Remove John Doe from your beneficiaries?'
 - tapOn: 'Cancel'
 - assertVisible: 'John Doe'
-- tapOn: 'Delete'
+- tapOn:
+    id: 'beneficiary-delete-1'
 # While the alert is open only the dialog is in the hierarchy, so this
 # taps the alert's confirm button (rendered uppercase by Android).
 - tapOn: 'Delete'

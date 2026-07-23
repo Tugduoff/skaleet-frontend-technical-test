@@ -3,8 +3,16 @@ appId: com.skaleetfrontendtechnicaltest
 # Edit flow: create a beneficiary, rename it, and verify the list updates.
 - launchApp:
     clearState: true
-- tapOn: 'Beneficiaries'
-- tapOn: 'Add Beneficiary'
+# Cold starts on the emulator are slow (bundle fetch + storage init):
+# give the first screen up to 60s to appear before interacting.
+- extendedWaitUntil:
+    visible:
+      id: 'home-add-transaction'
+    timeout: 60000
+- tapOn:
+    id: 'tab-beneficiaries'
+- tapOn:
+    id: 'add-beneficiary'
 - tapOn: 'First name'
 - inputText: 'John'
 - hideKeyboard
@@ -16,7 +24,8 @@ appId: com.skaleetfrontendtechnicaltest
 - hideKeyboard
 - tapOn: 'Save Beneficiary'
 - assertVisible: 'John Doe'
-- tapOn: 'Edit'
+- tapOn:
+    id: 'beneficiary-edit-1'
 # The form is prefilled, so fields are matched by their current value.
 - tapOn: 'Doe'
 - eraseText

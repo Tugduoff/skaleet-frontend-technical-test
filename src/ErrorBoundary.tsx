@@ -1,8 +1,11 @@
 import React from 'react';
-import { View, Text, Button, StyleSheet } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { WarningCircle } from 'phosphor-react-native';
 
+import { Button } from './components/Button';
 import { t } from './i18n';
+import { colors, radius, spacing, typography } from './theme';
 
 interface ErrorBoundaryProps {
   children: React.ReactNode;
@@ -27,9 +30,16 @@ const Fallback = ({
         styles.container,
         { paddingTop: insets.top, paddingBottom: insets.bottom },
       ]}>
+      <View style={styles.disc}>
+        <WarningCircle size={44} color={colors.danger} weight="fill" />
+      </View>
       <Text style={styles.title}>{t('errorBoundary.title')}</Text>
       <Text style={styles.message}>{error.message}</Text>
-      <Button title={t('errorBoundary.retry')} onPress={onRetry} />
+      <Button
+        title={t('errorBoundary.retry')}
+        onPress={onRetry}
+        style={styles.retry}
+      />
     </View>
   );
 };
@@ -71,16 +81,30 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    padding: 16,
+    padding: spacing.xl,
+    backgroundColor: colors.background,
+  },
+  disc: {
+    width: 88,
+    height: 88,
+    borderRadius: radius.full,
+    backgroundColor: colors.dangerSoft,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: spacing.lg,
   },
   title: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    marginBottom: 8,
+    ...typography.heading,
+    color: colors.ink,
+    marginBottom: spacing.sm,
   },
   message: {
-    color: '#666',
+    ...typography.body,
+    color: colors.inkMuted,
     textAlign: 'center',
-    marginBottom: 16,
+    marginBottom: spacing.xl,
+  },
+  retry: {
+    alignSelf: 'stretch',
   },
 });

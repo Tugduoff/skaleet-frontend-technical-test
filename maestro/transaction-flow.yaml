@@ -4,8 +4,16 @@ appId: com.skaleetfrontendtechnicaltest
 # the app, and verify the state persisted (balance + history).
 - launchApp:
     clearState: true
-- tapOn: 'Beneficiaries'
-- tapOn: 'Add Beneficiary'
+# Cold starts on the emulator are slow (bundle fetch + storage init):
+# give the first screen up to 60s to appear before interacting.
+- extendedWaitUntil:
+    visible:
+      id: 'home-add-transaction'
+    timeout: 60000
+- tapOn:
+    id: 'tab-beneficiaries'
+- tapOn:
+    id: 'add-beneficiary'
 - tapOn: 'First name'
 - inputText: 'John'
 - hideKeyboard
@@ -16,18 +24,20 @@ appId: com.skaleetfrontendtechnicaltest
 - inputText: 'GB29 NWBK 6016 1331 9268 19'
 - hideKeyboard
 - tapOn: 'Save Beneficiary'
-- assertVisible: 'IBAN: GB29NWBK60161331926819'
-- back
-- tapOn: 'Add Transaction'
-- tapOn: 'Enter amount'
+- assertVisible: 'GB29 NWBK 6016 1331 9268 19'
+- tapOn:
+    id: 'tab-home'
+- tapOn:
+    id: 'home-add-transaction'
+- tapOn: '0.00'
 - inputText: '10.50'
 - hideKeyboard
-# The beneficiary just created is the picker's default selection.
+# The beneficiary just created is the recipient chips' default selection.
 - tapOn: 'Submit Transaction'
-- assertVisible: 'Current Balance: €989.50'
-- assertVisible: 'Amount: €10.50'
-- assertVisible: 'To: John Doe'
+- assertVisible: '€989.50'
+- assertVisible: '-€10.50'
+- assertVisible: 'John Doe'
 - stopApp
 - launchApp
-- assertVisible: 'Current Balance: €989.50'
-- assertVisible: 'To: John Doe'
+- assertVisible: '€989.50'
+- assertVisible: 'John Doe'

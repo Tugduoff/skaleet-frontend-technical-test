@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { Alert } from 'react-native';
 
 import { useTransactions } from '../TransactionContext';
@@ -11,7 +11,14 @@ import { formatAmount } from '../utils/amount';
  * and the confirmed reset flow.
  */
 export const useHomeScreen = () => {
-  const { transactions, balanceCents, resetDemoData } = useTransactions();
+  const {
+    transactions,
+    balanceCents,
+    beneficiaries,
+    receiveFunds,
+    resetDemoData,
+  } = useTransactions();
+  const [balanceHidden, setBalanceHidden] = useState(false);
 
   const sortedTransactions = useMemo(
     () =>
@@ -21,7 +28,10 @@ export const useHomeScreen = () => {
     [transactions],
   );
 
-  /** Asks for confirmation, then restores the initial demo state. */
+  const toggleBalanceHidden = () => setBalanceHidden(hidden => !hidden);
+
+  const receiveDemoFunds = () => receiveFunds(100_000);
+
   const confirmReset = () => {
     Alert.alert(t('home.resetTitle'), t('home.resetMessage'), [
       { text: t('common.cancel'), style: 'cancel' },
@@ -36,7 +46,11 @@ export const useHomeScreen = () => {
   return {
     transactions: sortedTransactions,
     balanceCents,
+    balanceHidden,
+    toggleBalanceHidden,
     formatAmount,
     confirmReset,
+    receiveDemoFunds,
+    beneficiaries,
   };
 };

@@ -12,7 +12,6 @@ import type { Beneficiary } from '../types';
 export const useBeneficiariesScreen = () => {
   const { beneficiaries, deleteBeneficiary } = useTransactions();
 
-  /** Asks for confirmation, then deletes the beneficiary. */
   const confirmDelete = (beneficiary: Beneficiary) => {
     Alert.alert(
       t('beneficiaries.deleteTitle'),
