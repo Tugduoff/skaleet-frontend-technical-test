@@ -1,59 +1,108 @@
 import React from 'react';
-import { View, Text, Button, FlatList, StyleSheet } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { View, Text, FlatList, Pressable, StyleSheet } from 'react-native';
+import { Plus, Trash, Users } from 'phosphor-react-native';
 
 import { useBeneficiariesScreen } from './hooks/useBeneficiariesScreen';
+import { useTabSwipe } from './hooks/useTabSwipe';
+import { Avatar } from './components/Avatar';
+import { Button } from './components/Button';
+import { EmptyState } from './components/EmptyState';
+import { FadeInView } from './components/FadeInView';
+import { IconButton } from './components/IconButton';
 import { getBeneficiaryFullName } from './utils/beneficiaries';
-import { t } from './i18n';
-import type { Beneficiary, RootStackParamList } from './types';
+import { formatIban } from './utils/iban';
+import { t, useLanguage } from './i18n';
+import { colors, spacing, typography } from './theme';
+import type {
+  Beneficiary,
+  RootStackParamList,
+  RootTabParamList,
+} from './types';
+import type { CompositeScreenProps } from '@react-navigation/native';
+import type { BottomTabScreenProps } from '@react-navigation/bottom-tabs';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 
-type Props = NativeStackScreenProps<RootStackParamList, 'Beneficiaries'>;
+type Props = CompositeScreenProps<
+  BottomTabScreenProps<RootTabParamList, 'Beneficiaries'>,
+  NativeStackScreenProps<RootStackParamList>
+>;
 
 const BeneficiariesScreen = ({ navigation }: Props) => {
+  useLanguage();
   const { beneficiaries, confirmDelete } = useBeneficiariesScreen();
-  // The stack header covers the top inset; keep content off the gesture bar.
-  const insets = useSafeAreaInsets();
+  const swipeHandlers = useTabSwipe(navigation, 'Beneficiaries');
 
-  const renderItem = ({ item }: { item: Beneficiary }) => (
-    <View style={styles.item}>
-      <Text style={styles.itemText}>{getBeneficiaryFullName(item)}</Text>
-      <Text style={styles.itemText}>
-        {t('beneficiaries.iban', { iban: item.iban })}
-      </Text>
-      <View style={styles.actions}>
-        <Button
-          title={t('beneficiaries.edit')}
-          onPress={() =>
-            navigation.navigate('BeneficiaryForm', {
-              beneficiaryId: item.id,
-            })
-          }
-        />
-        <Button
-          title={t('beneficiaries.delete')}
-          onPress={() => confirmDelete(item)}
-        />
-      </View>
-    </View>
-  );
+  const renderItem = ({
+    item,
+    index,
+  }: {
+    item: Beneficiary;
+    index: number;
+  }) => {
+    const fullName = getBeneficiaryFullName(item);
+    return (
+      <FadeInView delay={Math.min(index, 6) * 60}>
+        <View style={styles.row}>
+          {/* Avatar, name and body all lead to edit; delete stays separate. */}
+          <Pressable
+            onPress={() =>
+              navigation.navigate('BeneficiaryForm', {
+                beneficiaryId: item.id,
+              })
+            }
+            accessibilityRole="button"
+            accessibilityLabel={t('beneficiaries.edit')}
+            testID={`beneficiary-edit-${item.id}`}
+            style={({ pressed }) => [
+              styles.rowMain,
+              pressed && styles.pressed,
+            ]}>
+            <Avatar name={fullName} size={48} />
+            <View style={styles.rowBody}>
+              <Text style={styles.rowName} numberOfLines={1}>
+                {fullName}
+              </Text>
+              <Text style={styles.rowIban} numberOfLines={1}>
+                {formatIban(item.iban)}
+              </Text>
+            </View>
+          </Pressable>
+          <IconButton
+            icon={<Trash size={18} color={colors.danger} />}
+            onPress={() => confirmDelete(item)}
+            accessibilityLabel={t('beneficiaries.delete')}
+            variant="danger"
+            size={36}
+            testID={`beneficiary-delete-${item.id}`}
+          />
+        </View>
+        {index < beneficiaries.length - 1 && <View style={styles.separator} />}
+      </FadeInView>
+    );
+  };
 
   return (
-    <View style={[styles.container, { paddingBottom: insets.bottom }]}>
+    <View style={styles.container} {...swipeHandlers}>
       <FlatList
         style={styles.list}
         data={beneficiaries}
         keyExtractor={item => item.id.toString()}
         renderItem={renderItem}
         ListEmptyComponent={
-          <Text style={styles.emptyText}>{t('beneficiaries.empty')}</Text>
+          <EmptyState
+            icon={<Users size={40} color={colors.accent} />}
+            title={t('beneficiaries.empty')}
+            subtitle={t('beneficiaries.emptySubtitle')}
+          />
         }
-        contentContainerStyle={styles.listContainer}
+        contentContainerStyle={styles.listContent}
       />
-      <View style={styles.footer}>
+      <View style={styles.ctaBar}>
         <Button
           title={t('beneficiaries.add')}
+          icon={<Plus size={20} color={colors.white} weight="bold" />}
           onPress={() => navigation.navigate('BeneficiaryForm')}
+          testID="add-beneficiary"
         />
       </View>
     </View>
@@ -63,40 +112,57 @@ const BeneficiariesScreen = ({ navigation }: Props) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: 'transparent',
   },
   list: {
     flex: 1,
   },
-  listContainer: {
+  listContent: {
+    paddingHorizontal: spacing.lg,
+    paddingBottom: spacing.xl,
     flexGrow: 1,
-    paddingTop: 20,
   },
-  emptyText: {
-    textAlign: 'center',
-    color: '#666',
-  },
-  item: {
-    backgroundColor: '#f9f9f9',
-    padding: 20,
-    marginVertical: 8,
-    marginHorizontal: 16,
-    borderRadius: 5,
-    borderWidth: 1,
-    borderColor: '#ddd',
-  },
-  itemText: {
-    fontSize: 16,
-  },
-  actions: {
+  row: {
     flexDirection: 'row',
-    justifyContent: 'flex-end',
-    gap: 8,
-    marginTop: 8,
+    alignItems: 'center',
+    gap: spacing.md,
+    paddingVertical: 14,
   },
-  footer: {
-    padding: 16,
-    borderTopWidth: 1,
-    borderColor: '#ddd',
+  rowMain: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.md,
+  },
+  pressed: {
+    opacity: 0.6,
+  },
+  rowBody: {
+    flex: 1,
+  },
+  rowName: {
+    ...typography.bodyMedium,
+    fontWeight: '600',
+    color: colors.ink,
+  },
+  rowIban: {
+    ...typography.caption,
+    color: colors.inkMuted,
+    fontVariant: ['tabular-nums'],
+    marginTop: 2,
+  },
+  separator: {
+    height: StyleSheet.hairlineWidth,
+    backgroundColor: colors.border,
+    marginLeft: 64,
+  },
+  ctaBar: {
+    paddingHorizontal: spacing.lg,
+    paddingTop: spacing.md,
+    paddingBottom: spacing.md,
+    backgroundColor: colors.background,
+    borderTopWidth: StyleSheet.hairlineWidth,
+    borderTopColor: colors.border,
   },
 });
 

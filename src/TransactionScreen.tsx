@@ -1,18 +1,80 @@
 import React from 'react';
-import { View, Text, TextInput, Button, StyleSheet, Alert } from 'react-native';
-import { Picker } from '@react-native-picker/picker';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import {
+  View,
+  Text,
+  TextInput,
+  ScrollView,
+  StyleSheet,
+  Alert,
+  KeyboardAvoidingView,
+  Platform,
+  Pressable,
+} from 'react-native';
+import { Bank, PaperPlaneTilt, Plus, User, X } from 'phosphor-react-native';
 
 import { useTransactionScreen } from './hooks/useTransactionScreen';
+import { useTabSwipe } from './hooks/useTabSwipe';
+import { Avatar } from './components/Avatar';
+import { Button } from './components/Button';
+import { Chip } from './components/Chip';
+import { FieldError } from './components/FieldError';
+import { IconButton } from './components/IconButton';
+import { TextField } from './components/TextField';
 import { getBeneficiaryFullName, splitFullName } from './utils/beneficiaries';
-import { t } from './i18n';
+import {
+  addCentsToAmountInput,
+  formatAmount,
+  parseAmountToCents,
+} from './utils/amount';
+import { t, useLanguage } from './i18n';
+import { colors, radius, spacing, typography } from './theme';
 import { normalizeIban } from './utils/iban';
-import type { RootStackParamList } from './types';
+import type { RootStackParamList, RootTabParamList } from './types';
+import type { CompositeScreenProps } from '@react-navigation/native';
+import type { BottomTabScreenProps } from '@react-navigation/bottom-tabs';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 
-type Props = NativeStackScreenProps<RootStackParamList, 'Transaction'>;
+type Props = CompositeScreenProps<
+  BottomTabScreenProps<RootTabParamList, 'Transaction'>,
+  NativeStackScreenProps<RootStackParamList>
+>;
+
+/** One-tap amounts offered under the input, in cents. */
+const QUICK_AMOUNTS_CENTS = [1000, 2000, 5000, 10000] as const;
+
+/** Circular recipient with its name underneath; selected gets a black ring.
+ *  A plain Pressable: PressableScale styles an inner view, so a percentage
+ *  column width would never reach the layout — the whole column stays
+ *  tappable and the name wraps inside it. */
+const RecipientCircle = ({
+  name,
+  selected,
+  onPress,
+  testID,
+}: {
+  name: string;
+  selected: boolean;
+  onPress: () => void;
+  testID?: string;
+}) => (
+  <Pressable
+    onPress={onPress}
+    accessibilityRole="button"
+    accessibilityState={{ selected }}
+    accessibilityLabel={name}
+    testID={testID}
+    style={({ pressed }) => [styles.recipient, pressed && styles.pressed]}>
+    <View style={[styles.recipientRing, selected && styles.recipientSelected]}>
+      <Avatar name={name} size={56} />
+    </View>
+    <Text style={styles.recipientName} numberOfLines={2}>
+      {name}
+    </Text>
+  </Pressable>
+);
 
 const TransactionScreen = ({ navigation }: Props) => {
+  useLanguage();
   const {
     amount,
     setAmount,
@@ -30,8 +92,9 @@ const TransactionScreen = ({ navigation }: Props) => {
     beneficiaries,
     submit,
   } = useTransactionScreen();
-  // The stack header covers the top inset; keep content off the gesture bar.
-  const insets = useSafeAreaInsets();
+  const swipeHandlers = useTabSwipe(navigation, 'Transaction');
+  // The submit CTA only appears once there is an actual amount to send.
+  const amountCents = parseAmountToCents(amount);
 
   const handleTransaction = () => {
     if (!submit()) {
@@ -41,7 +104,7 @@ const TransactionScreen = ({ navigation }: Props) => {
       beneficiary => beneficiary.iban === normalizeIban(iban),
     );
     if (!useManualEntry || recipientSaved) {
-      navigation.goBack();
+      navigation.navigate('Home');
       return;
     }
     // Manual recipient not yet saved: offer to reuse it next time.
@@ -53,12 +116,12 @@ const TransactionScreen = ({ navigation }: Props) => {
         {
           text: t('transaction.saveDecline'),
           style: 'cancel',
-          onPress: () => navigation.goBack(),
+          onPress: () => navigation.navigate('Home'),
         },
         {
           text: t('transaction.saveConfirm'),
           onPress: () =>
-            navigation.replace('BeneficiaryForm', {
+            navigation.navigate('BeneficiaryForm', {
               prefillFirstName: firstName,
               prefillLastName: lastName,
               prefillIban: iban,
@@ -69,83 +132,253 @@ const TransactionScreen = ({ navigation }: Props) => {
   };
 
   return (
-    <View style={[styles.container, { paddingBottom: insets.bottom }]}>
-      <TextInput
-        style={styles.input}
-        onChangeText={setAmount}
-        value={amount}
-        keyboardType="numeric"
-        placeholder={t('transaction.amountPlaceholder')}
-      />
-      {amountError ? <Text style={styles.error}>{amountError}</Text> : null}
-      {beneficiaries.length > 0 && (
-        <Picker
-          testID="beneficiary-picker"
-          selectedValue={useManualEntry ? 'manual' : selectedBeneficiary?.id}
-          onValueChange={(value: number | 'manual') => setSelection(value)}
-          style={styles.picker}>
-          {beneficiaries.map(beneficiary => (
-            <Picker.Item
-              key={beneficiary.id}
-              label={`${getBeneficiaryFullName(beneficiary)} - ${beneficiary.iban}`}
-              value={beneficiary.id}
+    <KeyboardAvoidingView
+      style={styles.container}
+      // Android pans the window instead (adjustPan in the manifest).
+      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      {...swipeHandlers}>
+      <ScrollView
+        contentContainerStyle={styles.content}
+        keyboardShouldPersistTaps="handled">
+        <View style={styles.amountBlock}>
+          <View style={styles.amountRow}>
+            {/* Equal side slots keep the amount optically centred; the
+                right one holds the clear button once an amount is entered. */}
+            <View style={styles.amountSide} />
+            <View style={styles.amountCenter}>
+              <Text style={styles.amountCurrency}>€</Text>
+              <TextInput
+                style={styles.amountInput}
+                value={amount}
+                onChangeText={setAmount}
+                keyboardType="decimal-pad"
+                placeholder="0.00"
+                placeholderTextColor={colors.inkFaint}
+              />
+            </View>
+            <View style={styles.amountSide}>
+              {amount !== '' && (
+                <IconButton
+                  icon={<X size={16} color={colors.ink} />}
+                  onPress={() => setAmount('')}
+                  accessibilityLabel={t('transaction.clearAmount')}
+                  size={36}
+                  testID="clear-amount"
+                />
+              )}
+            </View>
+          </View>
+          <FieldError message={amountError} reserveSpace />
+          <View style={styles.quickRow}>
+            {QUICK_AMOUNTS_CENTS.map(cents => (
+              <Chip
+                key={cents}
+                label={`+${formatAmount(cents)}`}
+                onPress={() => setAmount(addCentsToAmountInput(amount, cents))}
+                testID={`quick-add-${cents}`}
+              />
+            ))}
+          </View>
+        </View>
+
+        <Text style={styles.label}>{t('transaction.recipientLabel')}</Text>
+        {beneficiaries.length > 0 ? (
+          // Fixed 20%-wide columns: exactly five recipients per row, the
+          // rest wrap onto the rows below — no horizontal scrolling.
+          <View style={styles.recipientGrid}>
+            {beneficiaries.map(beneficiary => {
+              const fullName = getBeneficiaryFullName(beneficiary);
+              return (
+                <RecipientCircle
+                  key={beneficiary.id}
+                  name={fullName}
+                  selected={
+                    !useManualEntry &&
+                    selectedBeneficiary?.id === beneficiary.id
+                  }
+                  onPress={() => setSelection(beneficiary.id)}
+                  testID={`beneficiary-option-${beneficiary.id}`}
+                />
+              );
+            })}
+            <Pressable
+              onPress={() => setSelection('manual')}
+              accessibilityRole="button"
+              accessibilityState={{ selected: useManualEntry }}
+              accessibilityLabel={t('transaction.manualEntry')}
+              testID="beneficiary-option-manual"
+              style={({ pressed }) => [
+                styles.recipient,
+                pressed && styles.pressed,
+              ]}>
+              <View
+                style={[
+                  styles.recipientRing,
+                  useManualEntry && styles.recipientSelected,
+                ]}>
+                <View style={styles.manualDisc}>
+                  <Plus size={24} color={colors.accent} />
+                </View>
+              </View>
+              <Text style={styles.recipientName} numberOfLines={2}>
+                {t('transaction.manualEntry')}
+              </Text>
+            </Pressable>
+          </View>
+        ) : (
+          <Text style={styles.hint}>{t('transaction.manualHint')}</Text>
+        )}
+        {useManualEntry && (
+          <View style={styles.manualFields}>
+            <TextField
+              icon={<User size={20} color={colors.inkFaint} />}
+              value={name}
+              onChangeText={setName}
+              placeholder={t('transaction.recipientName')}
+              autoCapitalize="words"
+              error={nameError}
             />
-          ))}
-          <Picker.Item label={t('transaction.manualEntry')} value="manual" />
-        </Picker>
-      )}
-      {useManualEntry && (
-        <>
-          {beneficiaries.length === 0 && (
-            <Text style={styles.hint}>{t('transaction.manualHint')}</Text>
-          )}
-          <TextInput
-            style={styles.input}
-            onChangeText={setName}
-            value={name}
-            placeholder={t('transaction.recipientName')}
+            <TextField
+              icon={<Bank size={20} color={colors.inkFaint} />}
+              value={iban}
+              onChangeText={setIban}
+              placeholder={t('transaction.recipientIban')}
+              autoCapitalize="characters"
+              autoCorrect={false}
+              error={ibanError}
+              style={styles.manualField}
+            />
+          </View>
+        )}
+      </ScrollView>
+      {amountCents !== null && amountCents > 0 && (
+        <View style={styles.ctaBar}>
+          <Button
+            title={t('transaction.submit')}
+            icon={
+              <PaperPlaneTilt size={20} color={colors.white} weight="bold" />
+            }
+            onPress={handleTransaction}
+            disabled={isSubmitting}
           />
-          {nameError ? <Text style={styles.error}>{nameError}</Text> : null}
-          <TextInput
-            style={styles.input}
-            onChangeText={setIban}
-            value={iban}
-            placeholder={t('transaction.recipientIban')}
-          />
-          {ibanError ? <Text style={styles.error}>{ibanError}</Text> : null}
-        </>
+        </View>
       )}
-      <Button
-        title={t('transaction.submit')}
-        onPress={handleTransaction}
-        disabled={isSubmitting}
-      />
-    </View>
+    </KeyboardAvoidingView>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: 'transparent',
+  },
+  content: {
+    padding: spacing.lg,
+    flexGrow: 1,
+  },
+  amountBlock: {
+    alignItems: 'center',
+    paddingVertical: spacing.xxl,
+  },
+  amountRow: {
+    flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
   },
-  input: {
-    height: 40,
-    borderColor: 'gray',
-    borderWidth: 1,
-    width: '80%',
-    marginVertical: 8,
+  amountSide: {
+    width: 40,
+    alignItems: 'center',
   },
-  picker: {
-    width: '80%',
+  amountCenter: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  amountCurrency: {
+    ...typography.hero,
+    fontSize: 32,
+    color: colors.accent,
+    marginRight: spacing.sm,
+  },
+  amountInput: {
+    ...typography.hero,
+    color: colors.ink,
+    paddingVertical: 0,
+    minWidth: 120,
+    textAlign: 'center',
+  },
+  quickRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'center',
+    gap: spacing.sm,
+    marginTop: spacing.md,
+  },
+  label: {
+    ...typography.label,
+    color: colors.inkMuted,
+    textTransform: 'uppercase',
+    letterSpacing: 1,
+    marginTop: spacing.sm,
+  },
+  recipientGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    rowGap: spacing.md,
+    paddingVertical: spacing.md,
+  },
+  recipient: {
+    alignItems: 'flex-start',
+    width: '20%',
+    gap: spacing.sm,
+  },
+  pressed: {
+    opacity: 0.6,
+  },
+  recipientRing: {
+    borderWidth: 2,
+    borderColor: 'transparent',
+    borderRadius: radius.full,
+    padding: 3,
+  },
+  recipientSelected: {
+    borderColor: colors.ink,
+  },
+  manualDisc: {
+    width: 56,
+    height: 56,
+    borderRadius: radius.full,
+    backgroundColor: colors.surface,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  recipientName: {
+    ...typography.captionMedium,
+    fontSize: 12,
+    color: colors.ink,
+    textAlign: 'center',
+    // Ring width (56 avatar + padding + border), so the name stays
+    // centered under its circle rather than under the whole slot.
+    width: 66,
   },
   hint: {
-    marginVertical: 8,
+    ...typography.body,
+    color: colors.inkMuted,
+    marginTop: spacing.sm,
   },
-  error: {
-    color: 'red',
-    marginBottom: 8,
+  manualFields: {
+    marginTop: spacing.md,
+  },
+  manualField: {
+    marginTop: spacing.md,
+  },
+  ctaBar: {
+    paddingHorizontal: spacing.lg,
+    paddingTop: spacing.md,
+    paddingBottom: spacing.md,
+    backgroundColor: colors.background,
+    borderTopWidth: StyleSheet.hairlineWidth,
+    borderTopColor: colors.border,
   },
 });
 

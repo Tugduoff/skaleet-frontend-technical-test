@@ -34,6 +34,21 @@ export const useTransactionScreen = () => {
   );
 
   /**
+   * Amount setter that clears a shown error as soon as it no longer
+   * applies: the field is emptied (the CTA hides at 0 anyway) or the new
+   * value is valid. An unresolved error stays until the next submit.
+   */
+  const handleAmountChange = (value: string) => {
+    setAmount(value);
+    if (
+      amountError &&
+      (value.trim() === '' || getAmountError(value, balanceCents) === null)
+    ) {
+      setAmountError('');
+    }
+  };
+
+  /**
    * Validates and submits the transaction. Returns true on success so the
    * screen can navigate away; false when validation or submission fails.
    */
@@ -79,12 +94,23 @@ export const useTransactionScreen = () => {
       setIsSubmitting(false);
       return false;
     }
+    // Success: clear the form so the tab is fresh for the next transfer.
+    setAmount('');
+    setName('');
+    setIban('');
+    setSelection(null);
+    setIsSubmitting(false);
+    // Release the re-entry guard on the next tick: a same-tick double tap
+    // stays blocked, but the (never-unmounted) tab screen can submit again.
+    setTimeout(() => {
+      submittingRef.current = false;
+    }, 0);
     return true;
   };
 
   return {
     amount,
-    setAmount,
+    setAmount: handleAmountChange,
     name,
     setName,
     iban,

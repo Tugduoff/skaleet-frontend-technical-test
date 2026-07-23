@@ -36,6 +36,11 @@ interface TransactionContextValue {
   updateBeneficiary: (id: number, input: BeneficiaryInput) => boolean;
   deleteBeneficiary: (id: number) => void;
   /**
+   * Adds funds straight to the balance without recording a transaction.
+   * Demo shortcut.
+   */
+  receiveFunds: (amountCents: number) => void;
+  /**
    * Restores the initial demo state: initial balance, no transactions,
    * no beneficiaries. Persisted by the usual save effect.
    */
@@ -78,6 +83,7 @@ export const TransactionProvider = ({ children }: { children: ReactNode }) => {
         balanceRef.current = state.balanceCents;
         setBalanceCents(state.balanceCents);
         setBeneficiaries(state.beneficiaries);
+        syncLastIdWithLoadedState(state.transactions, state.beneficiaries);
       }
       setIsLoading(false);
     });
@@ -94,8 +100,20 @@ export const TransactionProvider = ({ children }: { children: ReactNode }) => {
 
   const lastId = useRef(0);
   const nextId = () => {
-    lastId.current = Math.max(Date.now(), lastId.current + 1);
+    lastId.current += 1;
     return lastId.current;
+  };
+
+  const syncLastIdWithLoadedState = (
+    loadedTransactions: Transaction[],
+    loadedBeneficiaries: Beneficiary[],
+  ) => {
+    const maxId = Math.max(
+      0,
+      ...loadedTransactions.map(transaction => transaction.id),
+      ...loadedBeneficiaries.map(beneficiary => beneficiary.id),
+    );
+    lastId.current = maxId;
   };
 
   const addTransaction = (amount: string, account: Account): boolean => {
@@ -179,6 +197,11 @@ export const TransactionProvider = ({ children }: { children: ReactNode }) => {
     setBeneficiaries([]);
   };
 
+  const receiveFunds = (amountCents: number) => {
+    balanceRef.current += amountCents;
+    setBalanceCents(balanceRef.current);
+  };
+
   return (
     <TransactionContext.Provider
       value={{
@@ -189,6 +212,7 @@ export const TransactionProvider = ({ children }: { children: ReactNode }) => {
         addBeneficiary,
         updateBeneficiary,
         deleteBeneficiary,
+        receiveFunds,
         resetDemoData,
         isLoading,
       }}>
