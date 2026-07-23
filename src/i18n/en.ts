@@ -36,7 +36,7 @@ export const en = {
   'transaction.submit': 'Submit Transaction',
   'transaction.recipientName': 'Recipient Name',
   'transaction.recipientIban': 'Recipient IBAN',
-  'transaction.manualEntry': 'Enter manually…',
+  'transaction.manualEntry': 'Enter manually',
   'transaction.manualHint':
     'No saved beneficiaries — enter the recipient manually',
   'transaction.saveTitle': 'Save recipient',
