@@ -12,9 +12,9 @@ import { formatAmount } from '../utils/amount';
  */
 export const useHomeScreen = () => {
   const {
-    transactions,
     balanceCents,
     beneficiaries,
+    transactions,
     receiveFunds,
     resetDemoData,
   } = useTransactions();
@@ -44,13 +44,13 @@ export const useHomeScreen = () => {
   };
 
   return {
-    transactions: sortedTransactions,
     balanceCents,
     balanceHidden,
-    toggleBalanceHidden,
-    formatAmount,
-    confirmReset,
-    receiveDemoFunds,
     beneficiaries,
+    transactions: sortedTransactions,
+    confirmReset,
+    formatAmount,
+    receiveDemoFunds,
+    toggleBalanceHidden,
   };
 };

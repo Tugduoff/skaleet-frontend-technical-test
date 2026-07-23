@@ -2,7 +2,11 @@ import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import type { BottomTabBarProps } from '@react-navigation/bottom-tabs';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { House, PaperPlaneTilt, Users } from 'phosphor-react-native';
+import {
+  HouseIcon,
+  PaperPlaneTiltIcon,
+  UsersIcon,
+} from 'phosphor-react-native';
 
 import { PressableScale } from './PressableScale';
 import { t, useLanguage } from '../i18n';
@@ -10,18 +14,17 @@ import { colors, shadows, spacing, typography } from '../theme';
 
 const TABS = {
   Home: {
-    icon: House,
+    icon: HouseIcon,
     label: () => t('tabs.home'),
     testID: 'tab-home',
   },
   Transaction: {
-    // Same glyph as the Home quick action: one transfer icon everywhere.
-    icon: PaperPlaneTilt,
+    icon: PaperPlaneTiltIcon,
     label: () => t('tabs.transfer'),
     testID: 'tab-transfer',
   },
   Beneficiaries: {
-    icon: Users,
+    icon: UsersIcon,
     label: () => t('tabs.beneficiaries'),
     testID: 'tab-beneficiaries',
   },
@@ -60,9 +63,6 @@ export const TabBar = ({ state, navigation }: BottomTabBarProps) => {
         };
 
         return (
-          // Each tab lives in an exact one-third slot: the pressable sizes
-          // to its content, so the slot — not the label width — sets the
-          // compartment and keeps the bar evenly divided.
           <View key={route.key} style={styles.tabSlot}>
             <PressableScale
               onPress={onPress}

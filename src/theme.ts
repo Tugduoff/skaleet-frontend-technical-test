@@ -9,32 +9,20 @@ import type { TextStyle, ViewStyle } from 'react-native';
  * Color is used sparingly so structure and type do the work.
  */
 export const colors = {
-  /** App background — pure white, the canvas everything sits on. */
   background: '#FFFFFF',
-  /** Filled surfaces: cards, inputs, chips, icon discs — warm bone tint. */
   surface: '#F6EDE5',
-  /** Stronger tint for pressed states and avatar discs. */
   surfaceStrong: '#ECE1D6',
-  /** Icon backdrops and secondary buttons. */
   primarySoft: '#F1E7DD',
-  /** Main text — near black. */
   ink: '#08090B',
-  /** Secondary text. */
   inkMuted: '#5C636E',
-  /** Placeholders, icons at rest. */
   inkFaint: '#9AA1AB',
-  /** Brand/action color — monochrome black, Revolut-style. */
   primary: '#08090B',
-  /** Warm orange accent — interactive hints, active states, icon tints. */
   accent: '#FF5A1F',
-  /** Soft orange tint for accent icon discs. */
   accentSoft: '#FFEDE4',
-  /** Top of the app-wide background gradient — a whisper of warm orange. */
   gradientTop: '#FFF1E8',
   success: '#0E9F6E',
   danger: '#D92D20',
   dangerSoft: '#FDECEC',
-  /** Hairline separators. */
   border: '#E8DED3',
   white: '#FFFFFF',
 } as const;
@@ -64,7 +52,6 @@ export const typography = {
     fontWeight: '700',
     letterSpacing: -0.5,
   },
-  /** The balance / amount hero — oversized, tight tracking, tabular digits. */
   hero: {
     fontSize: 32,
     fontWeight: '700',

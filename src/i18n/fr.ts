@@ -1,9 +1,5 @@
 import type { en } from './en';
 
-/**
- * French translations. Typed as a complete record over the English keys:
- * a missing key is a compile error.
- */
 export const fr: Record<keyof typeof en, string> = {
   'screens.home': 'Accueil',
   'screens.transaction': 'Transaction',

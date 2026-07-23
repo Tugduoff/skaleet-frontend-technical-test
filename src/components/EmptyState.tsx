@@ -5,11 +5,9 @@ import { Button } from './Button';
 import { colors, radius, spacing, typography } from '../theme';
 
 interface EmptyStateProps {
-  /** Icon shown inside the tinted disc. */
   icon: React.ReactNode;
   title: string;
   subtitle?: string;
-  /** Optional call-to-action rendered under the text. */
   actionLabel?: string;
   onAction?: () => void;
   actionTestID?: string;

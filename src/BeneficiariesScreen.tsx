@@ -1,13 +1,13 @@
 import React from 'react';
 import { View, Text, FlatList, Pressable, StyleSheet } from 'react-native';
-import { Plus, Users } from 'phosphor-react-native';
+import { PlusIcon, UsersIcon } from 'phosphor-react-native';
 
-import { useBeneficiariesScreen } from './hooks/useBeneficiariesScreen';
 import { useTabSwipe } from './hooks/useTabSwipe';
 import { Avatar } from './components/Avatar';
 import { Button } from './components/Button';
 import { EmptyState } from './components/EmptyState';
 import { FadeInView } from './components/FadeInView';
+import { GradientBackground } from './components/GradientBackground';
 import { getBeneficiaryFullName } from './utils/beneficiaries';
 import { formatIban } from './utils/iban';
 import { t, useLanguage } from './i18n';
@@ -20,6 +20,7 @@ import type {
 import type { CompositeScreenProps } from '@react-navigation/native';
 import type { BottomTabScreenProps } from '@react-navigation/bottom-tabs';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { useTransactions } from './TransactionContext';
 
 type Props = CompositeScreenProps<
   BottomTabScreenProps<RootTabParamList, 'Beneficiaries'>,
@@ -28,7 +29,7 @@ type Props = CompositeScreenProps<
 
 const BeneficiariesScreen = ({ navigation }: Props) => {
   useLanguage();
-  const { beneficiaries } = useBeneficiariesScreen();
+  const { beneficiaries } = useTransactions();
   const swipeHandlers = useTabSwipe(navigation, 'Beneficiaries');
 
   const renderItem = ({
@@ -68,6 +69,7 @@ const BeneficiariesScreen = ({ navigation }: Props) => {
 
   return (
     <View style={styles.container} {...swipeHandlers}>
+      <GradientBackground />
       <FlatList
         style={styles.list}
         data={beneficiaries}
@@ -75,7 +77,7 @@ const BeneficiariesScreen = ({ navigation }: Props) => {
         renderItem={renderItem}
         ListEmptyComponent={
           <EmptyState
-            icon={<Users size={40} color={colors.accent} />}
+            icon={<UsersIcon size={40} color={colors.accent} />}
             title={t('beneficiaries.empty')}
             subtitle={t('beneficiaries.emptySubtitle')}
           />
@@ -85,7 +87,7 @@ const BeneficiariesScreen = ({ navigation }: Props) => {
       <View style={styles.ctaBar}>
         <Button
           title={t('beneficiaries.add')}
-          icon={<Plus size={20} color={colors.white} weight="bold" />}
+          icon={<PlusIcon size={20} color={colors.white} weight="bold" />}
           onPress={() => navigation.navigate('BeneficiaryForm')}
           testID="add-beneficiary"
         />

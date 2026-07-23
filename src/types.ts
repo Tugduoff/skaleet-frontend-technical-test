@@ -14,10 +14,8 @@ export interface Beneficiary {
 
 export interface Transaction {
   id: number;
-  /** Integer cents, e.g. 1050 for 10.50. */
   amountCents: number;
   account: Account;
-  /** ISO 8601 creation timestamp. */
   createdAt: string;
 }
 
@@ -34,7 +32,6 @@ export type RootStackParamList = {
   BeneficiaryDetail: { beneficiaryId: number };
   BeneficiaryForm:
     | {
-        /** Present to edit an existing beneficiary, absent to create one. */
         beneficiaryId?: number;
         prefillFirstName?: string;
         prefillLastName?: string;

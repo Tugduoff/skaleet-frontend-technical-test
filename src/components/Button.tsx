@@ -11,7 +11,6 @@ interface ButtonProps {
   title: string;
   onPress: () => void;
   variant?: ButtonVariant;
-  /** Optional icon rendered before the label, colored to match it. */
   icon?: React.ReactNode;
   disabled?: boolean;
   style?: StyleProp<ViewStyle>;

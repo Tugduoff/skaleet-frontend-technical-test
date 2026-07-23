@@ -8,9 +8,7 @@ import { colors, radius, spacing, typography } from '../theme';
 interface ChipProps {
   label: string;
   onPress: () => void;
-  /** Selected chips get the primary tint; unselected stay neutral. */
   selected?: boolean;
-  /** Optional leading element (avatar, icon). */
   leading?: React.ReactNode;
   style?: StyleProp<ViewStyle>;
   testID?: string;

@@ -13,7 +13,6 @@ interface TransactionRowProps {
   transaction: Transaction;
   index: number;
   showSeparator: boolean;
-  /** When provided the whole row is tappable. */
   onPress?: () => void;
   testID?: string;
 }

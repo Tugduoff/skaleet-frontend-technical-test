@@ -10,11 +10,8 @@ const TAB_ORDER: ReadonlyArray<keyof RootTabParamList> = [
   'Beneficiaries',
 ];
 
-/** Distance (px) at which the gesture is claimed as horizontal. */
 const CLAIM_THRESHOLD = 32;
-/** Distance (px) that confirms the intent to switch tab. */
 const TRIGGER_THRESHOLD = 48;
-/** How much the horizontal axis must dominate for the claim to win. */
 const HORIZONTAL_DOMINANCE = 2.5;
 
 /**

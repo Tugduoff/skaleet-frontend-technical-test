@@ -5,7 +5,6 @@ import type { PressableProps, StyleProp, ViewStyle } from 'react-native';
 interface PressableScaleProps extends PressableProps {
   children: React.ReactNode;
   style?: StyleProp<ViewStyle>;
-  /** Scale applied while pressed. */
   scaleTo?: number;
 }
 

@@ -1,33 +1,24 @@
 import React from 'react';
 import {
-  View,
-  Text,
-  TextInput,
   ScrollView,
   StyleSheet,
   Alert,
   KeyboardAvoidingView,
   Platform,
-  Pressable,
+  View,
 } from 'react-native';
-import { Bank, PaperPlaneTilt, Plus, User, X } from 'phosphor-react-native';
+import { PaperPlaneTiltIcon } from 'phosphor-react-native';
 
 import { useTransactionScreen } from './hooks/useTransactionScreen';
 import { useTabSwipe } from './hooks/useTabSwipe';
-import { Avatar } from './components/Avatar';
+import { AmountInput } from './components/AmountInput';
 import { Button } from './components/Button';
-import { Chip } from './components/Chip';
-import { FieldError } from './components/FieldError';
-import { IconButton } from './components/IconButton';
-import { TextField } from './components/TextField';
-import { getBeneficiaryFullName, splitFullName } from './utils/beneficiaries';
-import {
-  addCentsToAmountInput,
-  formatAmount,
-  parseAmountToCents,
-} from './utils/amount';
+import { ManualRecipientFields } from './components/ManualRecipientFields';
+import { RecipientPicker } from './components/RecipientPicker';
+import { splitFullName } from './utils/beneficiaries';
+import { parseAmountToCents } from './utils/amount';
 import { t, useLanguage } from './i18n';
-import { colors, radius, spacing, typography } from './theme';
+import { colors, spacing } from './theme';
 import { normalizeIban } from './utils/iban';
 import type { RootStackParamList, RootTabParamList } from './types';
 import type { CompositeScreenProps } from '@react-navigation/native';
@@ -39,57 +30,23 @@ type Props = CompositeScreenProps<
   NativeStackScreenProps<RootStackParamList>
 >;
 
-/** One-tap amounts offered under the input, in cents. */
-const QUICK_AMOUNTS_CENTS = [1000, 2000, 5000, 10000] as const;
-
-/** Circular recipient with its name underneath; selected gets a black ring.
- *  A plain Pressable: PressableScale styles an inner view, so a percentage
- *  column width would never reach the layout — the whole column stays
- *  tappable and the name wraps inside it. */
-const RecipientCircle = ({
-  name,
-  selected,
-  onPress,
-  testID,
-}: {
-  name: string;
-  selected: boolean;
-  onPress: () => void;
-  testID?: string;
-}) => (
-  <Pressable
-    onPress={onPress}
-    accessibilityRole="button"
-    accessibilityState={{ selected }}
-    accessibilityLabel={name}
-    testID={testID}
-    style={({ pressed }) => [styles.recipient, pressed && styles.pressed]}>
-    <View style={[styles.recipientRing, selected && styles.recipientSelected]}>
-      <Avatar name={name} size={56} />
-    </View>
-    <Text style={styles.recipientName} numberOfLines={2}>
-      {name}
-    </Text>
-  </Pressable>
-);
-
 const TransactionScreen = ({ navigation, route }: Props) => {
   useLanguage();
   const {
     amount,
-    setAmount,
-    name,
-    setName,
-    iban,
-    setIban,
-    setSelection,
     amountError,
-    nameError,
+    beneficiaries,
+    iban,
     ibanError,
     isSubmitting,
-    useManualEntry,
+    name,
+    nameError,
     selectedBeneficiary,
-    beneficiaries,
+    useManualEntry,
+    setAmount,
+    setIban,
+    setName,
+    setSelection,
     submit,
   } = useTransactionScreen(route.params?.prefillBeneficiaryId);
   const swipeHandlers = useTabSwipe(navigation, 'Transaction');
@@ -112,7 +69,8 @@ const TransactionScreen = ({ navigation, route }: Props) => {
       navigation.navigate('Home');
       return;
     }
-    // Manual recipient not yet saved: offer to reuse it next time.
+
+    // Add a new beneficiary after sending to them, if they don't already exist.
     const { firstName, lastName } = splitFullName(name);
     Alert.alert(
       t('transaction.saveTitle'),
@@ -139,121 +97,32 @@ const TransactionScreen = ({ navigation, route }: Props) => {
   return (
     <KeyboardAvoidingView
       style={styles.container}
-      // Android pans the window instead (adjustPan in the manifest).
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       {...swipeHandlers}>
       <ScrollView
         contentContainerStyle={styles.content}
         keyboardShouldPersistTaps="handled">
-        <View style={styles.amountBlock}>
-          <View style={styles.amountRow}>
-            {/* Equal side slots keep the amount optically centred; the
-                right one holds the clear button once an amount is entered. */}
-            <View style={styles.amountSide} />
-            <View style={styles.amountCenter}>
-              <Text style={styles.amountCurrency}>€</Text>
-              <TextInput
-                style={styles.amountInput}
-                value={amount}
-                onChangeText={setAmount}
-                keyboardType="decimal-pad"
-                placeholder="0.00"
-                placeholderTextColor={colors.inkFaint}
-              />
-            </View>
-            <View style={styles.amountSide}>
-              {amount !== '' && (
-                <IconButton
-                  icon={<X size={16} color={colors.ink} />}
-                  onPress={() => setAmount('')}
-                  accessibilityLabel={t('transaction.clearAmount')}
-                  size={36}
-                  testID="clear-amount"
-                />
-              )}
-            </View>
-          </View>
-          <FieldError message={amountError} reserveSpace />
-          <View style={styles.quickRow}>
-            {QUICK_AMOUNTS_CENTS.map(cents => (
-              <Chip
-                key={cents}
-                label={`+${formatAmount(cents)}`}
-                onPress={() => setAmount(addCentsToAmountInput(amount, cents))}
-                testID={`quick-add-${cents}`}
-              />
-            ))}
-          </View>
-        </View>
+        <AmountInput
+          amount={amount}
+          onChangeAmount={setAmount}
+          error={amountError}
+        />
 
-        <Text style={styles.label}>{t('transaction.recipientLabel')}</Text>
-        {beneficiaries.length > 0 ? (
-          // Fixed 20%-wide columns: exactly five recipients per row, the
-          // rest wrap onto the rows below — no horizontal scrolling.
-          <View style={styles.recipientGrid}>
-            {beneficiaries.map(beneficiary => {
-              const fullName = getBeneficiaryFullName(beneficiary);
-              return (
-                <RecipientCircle
-                  key={beneficiary.id}
-                  name={fullName}
-                  selected={
-                    !useManualEntry &&
-                    selectedBeneficiary?.id === beneficiary.id
-                  }
-                  onPress={() => setSelection(beneficiary.id)}
-                  testID={`beneficiary-option-${beneficiary.id}`}
-                />
-              );
-            })}
-            <Pressable
-              onPress={() => setSelection('manual')}
-              accessibilityRole="button"
-              accessibilityState={{ selected: useManualEntry }}
-              accessibilityLabel={t('transaction.manualEntry')}
-              testID="beneficiary-option-manual"
-              style={({ pressed }) => [
-                styles.recipient,
-                pressed && styles.pressed,
-              ]}>
-              <View
-                style={[
-                  styles.recipientRing,
-                  useManualEntry && styles.recipientSelected,
-                ]}>
-                <View style={styles.manualDisc}>
-                  <Plus size={24} color={colors.accent} />
-                </View>
-              </View>
-              <Text style={styles.recipientName} numberOfLines={2}>
-                {t('transaction.manualEntry')}
-              </Text>
-            </Pressable>
-          </View>
-        ) : (
-          <Text style={styles.hint}>{t('transaction.manualHint')}</Text>
-        )}
+        <RecipientPicker
+          beneficiaries={beneficiaries}
+          useManualEntry={useManualEntry}
+          selectedBeneficiary={selectedBeneficiary}
+          onSelect={setSelection}
+        />
         {useManualEntry && (
-          <View style={styles.manualFields}>
-            <TextField
-              icon={<User size={20} color={colors.inkFaint} />}
-              value={name}
-              onChangeText={setName}
-              placeholder={t('transaction.recipientName')}
-              autoCapitalize="words"
-              error={nameError}
-            />
-            <TextField
-              icon={<Bank size={20} color={colors.inkFaint} />}
-              value={iban}
-              onChangeText={setIban}
-              placeholder={t('transaction.recipientIban')}
-              autoCapitalize="characters"
-              autoCorrect={false}
-              error={ibanError}
-              style={styles.manualField}
-            />
-          </View>
+          <ManualRecipientFields
+            name={name}
+            onChangeName={setName}
+            nameError={nameError}
+            iban={iban}
+            onChangeIban={setIban}
+            ibanError={ibanError}
+          />
         )}
       </ScrollView>
       {canSubmit && (
@@ -261,7 +130,11 @@ const TransactionScreen = ({ navigation, route }: Props) => {
           <Button
             title={t('transaction.submit')}
             icon={
-              <PaperPlaneTilt size={20} color={colors.white} weight="bold" />
+              <PaperPlaneTiltIcon
+                size={20}
+                color={colors.white}
+                weight="bold"
+              />
             }
             onPress={handleTransaction}
             disabled={isSubmitting}
@@ -280,100 +153,6 @@ const styles = StyleSheet.create({
   content: {
     padding: spacing.lg,
     flexGrow: 1,
-  },
-  amountBlock: {
-    alignItems: 'center',
-    paddingVertical: spacing.xxl,
-  },
-  amountRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  amountSide: {
-    width: 40,
-    alignItems: 'center',
-  },
-  amountCenter: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  amountCurrency: {
-    ...typography.hero,
-    color: colors.accent,
-    marginRight: spacing.sm,
-  },
-  amountInput: {
-    ...typography.hero,
-    color: colors.ink,
-    paddingVertical: 0,
-    minWidth: 120,
-    textAlign: 'center',
-  },
-  quickRow: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'center',
-    gap: spacing.sm,
-    marginTop: spacing.md,
-  },
-  label: {
-    ...typography.label,
-    color: colors.inkMuted,
-    textTransform: 'uppercase',
-    letterSpacing: 1,
-    marginTop: spacing.sm,
-  },
-  recipientGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    rowGap: spacing.md,
-    paddingVertical: spacing.md,
-  },
-  recipient: {
-    alignItems: 'flex-start',
-    width: '20%',
-    gap: spacing.sm,
-  },
-  pressed: {
-    opacity: 0.6,
-  },
-  recipientRing: {
-    borderWidth: 2,
-    borderColor: 'transparent',
-    borderRadius: radius.full,
-    padding: 3,
-  },
-  recipientSelected: {
-    borderColor: colors.ink,
-  },
-  manualDisc: {
-    width: 56,
-    height: 56,
-    borderRadius: radius.full,
-    backgroundColor: colors.surface,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  recipientName: {
-    ...typography.captionMedium,
-    color: colors.ink,
-    textAlign: 'center',
-    // Ring width (56 avatar + padding + border), so the name stays
-    // centered under its circle rather than under the whole slot.
-    width: 66,
-  },
-  hint: {
-    ...typography.body,
-    color: colors.inkMuted,
-    marginTop: spacing.sm,
-  },
-  manualFields: {
-    marginTop: spacing.md,
-  },
-  manualField: {
-    marginTop: spacing.md,
   },
   ctaBar: {
     paddingHorizontal: spacing.lg,

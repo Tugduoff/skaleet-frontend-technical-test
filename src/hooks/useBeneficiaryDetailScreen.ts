@@ -11,7 +11,7 @@ import type { Beneficiary, Transaction } from '../types';
  * and a confirmed deletion callback that invokes the supplied onDeleted hook.
  */
 export const useBeneficiaryDetailScreen = (beneficiaryId: number) => {
-  const { beneficiaries, deleteBeneficiary, transactions } = useTransactions();
+  const { beneficiaries, transactions, deleteBeneficiary } = useTransactions();
 
   const beneficiary = beneficiaries.find(b => b.id === beneficiaryId);
 

@@ -2,13 +2,13 @@ import React, { useRef } from 'react';
 import { View, Text, FlatList, Pressable, StyleSheet } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
-  ArrowCounterClockwise,
-  Eye,
-  EyeSlash,
-  HandCoins,
-  PaperPlaneTilt,
-  Receipt,
-  Users,
+  ArrowCounterClockwiseIcon,
+  EyeIcon,
+  EyeSlashIcon,
+  HandCoinsIcon,
+  PaperPlaneTiltIcon,
+  ReceiptIcon,
+  UsersIcon,
 } from 'phosphor-react-native';
 
 import { useHomeScreen } from './hooks/useHomeScreen';
@@ -35,18 +35,17 @@ type Props = CompositeScreenProps<
 const HomeScreen = ({ navigation }: Props) => {
   useLanguage();
   const {
-    transactions,
     balanceCents,
     balanceHidden,
-    toggleBalanceHidden,
+    beneficiaries,
+    transactions,
     confirmReset,
     receiveDemoFunds,
-    beneficiaries,
+    toggleBalanceHidden,
   } = useHomeScreen();
   const insets = useSafeAreaInsets();
   const swipeHandlers = useTabSwipe(navigation, 'Home');
 
-  // Double-tapping the amount toggles privacy, same as the eye button.
   const lastAmountTapRef = useRef(0);
   const handleAmountPress = () => {
     const now = Date.now();
@@ -66,9 +65,9 @@ const HomeScreen = ({ navigation }: Props) => {
           <IconButton
             icon={
               balanceHidden ? (
-                <EyeSlash size={18} color={colors.ink} />
+                <EyeSlashIcon size={18} color={colors.ink} />
               ) : (
-                <Eye size={18} color={colors.ink} />
+                <EyeIcon size={18} color={colors.ink} />
               )
             }
             onPress={toggleBalanceHidden}
@@ -79,14 +78,16 @@ const HomeScreen = ({ navigation }: Props) => {
             testID="toggle-balance"
           />
           <IconButton
-            icon={<HandCoins size={18} color={colors.accent} />}
+            icon={<HandCoinsIcon size={18} color={colors.accent} />}
             onPress={receiveDemoFunds}
             accessibilityLabel={t('home.receiveDemo')}
             size={40}
             testID="receive-demo"
           />
           <IconButton
-            icon={<ArrowCounterClockwise size={18} color={colors.inkMuted} />}
+            icon={
+              <ArrowCounterClockwiseIcon size={18} color={colors.inkMuted} />
+            }
             onPress={confirmReset}
             accessibilityLabel={t('home.reset')}
             size={40}
@@ -111,13 +112,13 @@ const HomeScreen = ({ navigation }: Props) => {
 
       <View style={styles.quickActions}>
         <QuickAction
-          icon={<PaperPlaneTilt size={22} color={colors.accent} />}
+          icon={<PaperPlaneTiltIcon size={22} color={colors.accent} />}
           label={t('home.addTransaction')}
           onPress={() => navigation.navigate('Transaction')}
           testID="home-add-transaction"
         />
         <QuickAction
-          icon={<Users size={22} color={colors.accent} />}
+          icon={<UsersIcon size={22} color={colors.accent} />}
           label={t('home.beneficiaries')}
           onPress={() => navigation.navigate('Beneficiaries')}
           testID="home-beneficiaries"
@@ -160,7 +161,7 @@ const HomeScreen = ({ navigation }: Props) => {
         ListHeaderComponent={listHeader}
         ListEmptyComponent={
           <EmptyState
-            icon={<Receipt size={40} color={colors.accent} />}
+            icon={<ReceiptIcon size={40} color={colors.accent} />}
             title={t('home.empty')}
             subtitle={t('home.emptySubtitle')}
           />
