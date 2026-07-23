@@ -73,7 +73,7 @@ const RecipientCircle = ({
   </Pressable>
 );
 
-const TransactionScreen = ({ navigation }: Props) => {
+const TransactionScreen = ({ navigation, route }: Props) => {
   useLanguage();
   const {
     amount,
@@ -91,7 +91,7 @@ const TransactionScreen = ({ navigation }: Props) => {
     selectedBeneficiary,
     beneficiaries,
     submit,
-  } = useTransactionScreen();
+  } = useTransactionScreen(route.params?.prefillBeneficiaryId);
   const swipeHandlers = useTabSwipe(navigation, 'Transaction');
   const amountCents = parseAmountToCents(amount);
   const canSubmit =

@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 import { useTransactions } from '../TransactionContext';
 import { t } from '../i18n';
@@ -14,13 +14,29 @@ import type { Account } from '../types';
  * Hook owning the transaction form state, validation, beneficiary selection,
  * and submission flow for TransactionScreen. Returns everything the screen
  * needs to render and submit.
+ *
+ * @param prefillBeneficiaryId - Optional beneficiary id to pre-select, e.g.
+ * when landing here from the beneficiary detail screen.
  */
-export const useTransactionScreen = () => {
+export const useTransactionScreen = (prefillBeneficiaryId?: number) => {
   const { addTransaction, balanceCents, beneficiaries } = useTransactions();
+  const prefillExists =
+    prefillBeneficiaryId !== undefined &&
+    beneficiaries.some(beneficiary => beneficiary.id === prefillBeneficiaryId);
   const [amount, setAmount] = useState('');
   const [name, setName] = useState('');
   const [iban, setIban] = useState('');
-  const [selection, setSelection] = useState<number | 'manual' | null>(null);
+  const [selection, setSelection] = useState<number | 'manual' | null>(
+    prefillExists ? prefillBeneficiaryId : null,
+  );
+
+  useEffect(() => {
+    if (prefillExists) {
+      setSelection(prefillBeneficiaryId);
+    } else {
+      setSelection(null);
+    }
+  }, [prefillBeneficiaryId, prefillExists]);
   const [amountError, setAmountError] = useState('');
   const [nameError, setNameError] = useState('');
   const [ibanError, setIbanError] = useState('');
@@ -103,10 +119,12 @@ export const useTransactionScreen = () => {
       return false;
     }
     // Success: clear the form so the tab is fresh for the next transfer.
+    // When prefilling a beneficiary, keep that selection so the user can
+    // send again without re-picking the recipient.
     setAmount('');
     setName('');
     setIban('');
-    setSelection(null);
+    setSelection(prefillExists ? prefillBeneficiaryId : null);
     setIsSubmitting(false);
     // Release the re-entry guard on the next tick: a same-tick double tap
     // stays blocked, but the (never-unmounted) tab screen can submit again.

@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Text, FlatList, Pressable, StyleSheet } from 'react-native';
-import { Plus, Trash, Users } from 'phosphor-react-native';
+import { Plus, Users } from 'phosphor-react-native';
 
 import { useBeneficiariesScreen } from './hooks/useBeneficiariesScreen';
 import { useTabSwipe } from './hooks/useTabSwipe';
@@ -8,7 +8,6 @@ import { Avatar } from './components/Avatar';
 import { Button } from './components/Button';
 import { EmptyState } from './components/EmptyState';
 import { FadeInView } from './components/FadeInView';
-import { IconButton } from './components/IconButton';
 import { getBeneficiaryFullName } from './utils/beneficiaries';
 import { formatIban } from './utils/iban';
 import { t, useLanguage } from './i18n';
@@ -29,7 +28,7 @@ type Props = CompositeScreenProps<
 
 const BeneficiariesScreen = ({ navigation }: Props) => {
   useLanguage();
-  const { beneficiaries, confirmDelete } = useBeneficiariesScreen();
+  const { beneficiaries } = useBeneficiariesScreen();
   const swipeHandlers = useTabSwipe(navigation, 'Beneficiaries');
 
   const renderItem = ({
@@ -42,40 +41,26 @@ const BeneficiariesScreen = ({ navigation }: Props) => {
     const fullName = getBeneficiaryFullName(item);
     return (
       <FadeInView delay={Math.min(index, 6) * 60}>
-        <View style={styles.row}>
-          {/* Avatar, name and body all lead to edit; delete stays separate. */}
-          <Pressable
-            onPress={() =>
-              navigation.navigate('BeneficiaryForm', {
-                beneficiaryId: item.id,
-              })
-            }
-            accessibilityRole="button"
-            accessibilityLabel={`${t('beneficiaries.edit')} ${fullName}`}
-            testID={`beneficiary-edit-${item.id}`}
-            style={({ pressed }) => [
-              styles.rowMain,
-              pressed && styles.pressed,
-            ]}>
-            <Avatar name={fullName} size={48} />
-            <View style={styles.rowBody}>
-              <Text style={styles.rowName} numberOfLines={1}>
-                {fullName}
-              </Text>
-              <Text style={styles.rowIban} numberOfLines={1}>
-                {formatIban(item.iban)}
-              </Text>
-            </View>
-          </Pressable>
-          <IconButton
-            icon={<Trash size={18} color={colors.danger} />}
-            onPress={() => confirmDelete(item)}
-            accessibilityLabel={`${t('beneficiaries.delete')} ${fullName}`}
-            variant="danger"
-            size={36}
-            testID={`beneficiary-delete-${item.id}`}
-          />
-        </View>
+        <Pressable
+          onPress={() =>
+            navigation.navigate('BeneficiaryDetail', {
+              beneficiaryId: item.id,
+            })
+          }
+          accessibilityRole="button"
+          accessibilityLabel={fullName}
+          testID={`beneficiary-row-${item.id}`}
+          style={({ pressed }) => [styles.row, pressed && styles.pressed]}>
+          <Avatar name={fullName} size={48} />
+          <View style={styles.rowBody}>
+            <Text style={styles.rowName} numberOfLines={1}>
+              {fullName}
+            </Text>
+            <Text style={styles.rowIban} numberOfLines={1}>
+              {formatIban(item.iban)}
+            </Text>
+          </View>
+        </Pressable>
         {index < beneficiaries.length - 1 && <View style={styles.separator} />}
       </FadeInView>
     );
@@ -123,16 +108,11 @@ const styles = StyleSheet.create({
     flexGrow: 1,
   },
   row: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.md,
-    paddingVertical: 14,
-  },
-  rowMain: {
     flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing.md,
+    paddingVertical: 14,
   },
   pressed: {
     opacity: 0.6,
