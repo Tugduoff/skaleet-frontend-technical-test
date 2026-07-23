@@ -1,3 +1,5 @@
+import type { NavigatorScreenParams } from '@react-navigation/native';
+
 export interface Account {
   name: string;
   iban: string;
@@ -22,13 +24,14 @@ export interface Transaction {
 /** Main sections, reachable from the bottom tab bar. */
 export type RootTabParamList = {
   Home: undefined;
-  Transaction: undefined;
+  Transaction: { prefillBeneficiaryId?: number } | undefined;
   Beneficiaries: undefined;
 };
 
 /** Root stack: the tabs, plus full-screen flows pushed on top of them. */
 export type RootStackParamList = {
-  Tabs: undefined;
+  Tabs: NavigatorScreenParams<RootTabParamList> | undefined;
+  BeneficiaryDetail: { beneficiaryId: number };
   BeneficiaryForm:
     | {
         /** Present to edit an existing beneficiary, absent to create one. */
