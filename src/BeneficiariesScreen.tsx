@@ -7,6 +7,7 @@ import { Avatar } from './components/Avatar';
 import { Button } from './components/Button';
 import { EmptyState } from './components/EmptyState';
 import { FadeInView } from './components/FadeInView';
+import { GradientBackground } from './components/GradientBackground';
 import { getBeneficiaryFullName } from './utils/beneficiaries';
 import { formatIban } from './utils/iban';
 import { t, useLanguage } from './i18n';
@@ -68,6 +69,7 @@ const BeneficiariesScreen = ({ navigation }: Props) => {
 
   return (
     <View style={styles.container} {...swipeHandlers}>
+      <GradientBackground />
       <FlatList
         style={styles.list}
         data={beneficiaries}

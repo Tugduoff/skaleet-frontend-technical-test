@@ -94,9 +94,6 @@ const BeneficiaryDetailScreen = ({ navigation, route }: Props) => {
 
   return (
     <View style={styles.container}>
-      {/* Opaque backdrop so the previous screen does not show through during
-          the push transition; without it both transparent screens blend for
-          the whole animation. */}
       <GradientBackground />
       <FlatList
         data={transactions}
