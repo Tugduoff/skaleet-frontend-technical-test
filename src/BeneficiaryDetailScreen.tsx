@@ -10,8 +10,8 @@ import {
 
 import { useBeneficiaryDetailScreen } from './hooks/useBeneficiaryDetailScreen';
 import { Avatar } from './components/Avatar';
-import { Button } from './components/Button';
 import { EmptyState } from './components/EmptyState';
+import { QuickAction } from './components/QuickAction';
 import { TransactionRow } from './components/TransactionRow';
 import { getBeneficiaryFullName } from './utils/beneficiaries';
 import { formatIban } from './utils/iban';
@@ -66,30 +66,25 @@ const BeneficiaryDetailScreen = ({ navigation, route }: Props) => {
         </Text>
       </View>
       <View style={styles.actions}>
-        <Button
-          title={t('beneficiaryDetail.send')}
-          icon={<PaperPlaneTilt size={20} color={colors.white} weight="bold" />}
+        <QuickAction
+          icon={<PaperPlaneTilt size={22} color={colors.white} weight="bold" />}
+          label={t('beneficiaryDetail.send')}
           onPress={handleSend}
+          variant="primary"
           testID="beneficiary-detail-send"
         />
-        <View style={styles.secondaryActions}>
-          <Button
-            title={t('common.edit')}
-            variant="secondary"
-            icon={<PencilSimple size={20} color={colors.primary} />}
-            onPress={handleEdit}
-            style={styles.secondaryAction}
-            testID="beneficiary-detail-edit"
-          />
-          <Button
-            title={t('common.delete')}
-            variant="danger"
-            icon={<Trash size={20} color={colors.danger} />}
-            onPress={handleDelete}
-            style={styles.secondaryAction}
-            testID="beneficiary-detail-delete"
-          />
-        </View>
+        <QuickAction
+          icon={<PencilSimple size={22} color={colors.primary} />}
+          label={t('common.edit')}
+          onPress={handleEdit}
+          testID="beneficiary-detail-edit"
+        />
+        <QuickAction
+          icon={<Trash size={22} color={colors.danger} />}
+          label={t('common.delete')}
+          onPress={handleDelete}
+          testID="beneficiary-detail-delete"
+        />
       </View>
       <Text style={styles.sectionTitle}>{t('beneficiaryDetail.history')}</Text>
     </>
@@ -152,16 +147,10 @@ const styles = StyleSheet.create({
     marginTop: spacing.xs,
   },
   actions: {
-    gap: spacing.md,
-    marginBottom: spacing.xxl,
-  },
-  secondaryActions: {
     flexDirection: 'row',
     justifyContent: 'center',
-    gap: spacing.md,
-  },
-  secondaryAction: {
-    minWidth: 140,
+    gap: spacing.xl,
+    marginBottom: spacing.xxl,
   },
   sectionTitle: {
     ...typography.title,

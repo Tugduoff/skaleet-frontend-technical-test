@@ -16,10 +16,10 @@ import { useTabSwipe } from './hooks/useTabSwipe';
 import { EmptyState } from './components/EmptyState';
 import { IconButton } from './components/IconButton';
 import { LanguageToggle } from './components/LanguageToggle';
-import { PressableScale } from './components/PressableScale';
+import { QuickAction } from './components/QuickAction';
 import { TransactionRow } from './components/TransactionRow';
 import { t, useLanguage } from './i18n';
-import { colors, radius, spacing, typography } from './theme';
+import { colors, spacing, typography } from './theme';
 import { formatAmount } from './utils/amount';
 import { normalizeIban } from './utils/iban';
 import type { RootStackParamList, RootTabParamList } from './types';
@@ -31,33 +31,6 @@ type Props = CompositeScreenProps<
   BottomTabScreenProps<RootTabParamList, 'Home'>,
   NativeStackScreenProps<RootStackParamList>
 >;
-
-/** Circular quick action with a label underneath — the Revolut home pattern.
- *  Labels wrap to two lines so longer translations never truncate. */
-const QuickAction = ({
-  icon,
-  label,
-  onPress,
-  testID,
-}: {
-  icon: React.ReactNode;
-  label: string;
-  onPress: () => void;
-  testID?: string;
-}) => (
-  <PressableScale
-    onPress={onPress}
-    accessibilityRole="button"
-    accessibilityLabel={label}
-    scaleTo={0.92}
-    testID={testID}
-    style={styles.quickAction}>
-    <View style={styles.quickActionDisc}>{icon}</View>
-    <Text style={styles.quickActionLabel} numberOfLines={2}>
-      {label}
-    </Text>
-  </PressableScale>
-);
 
 const HomeScreen = ({ navigation }: Props) => {
   useLanguage();
@@ -237,25 +210,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     gap: spacing.xl,
     marginTop: spacing.xxl,
-  },
-  quickAction: {
-    alignItems: 'center',
-    width: 76,
-    gap: spacing.sm,
-  },
-  quickActionDisc: {
-    width: 56,
-    height: 56,
-    borderRadius: radius.full,
-    backgroundColor: colors.accentSoft,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  quickActionLabel: {
-    ...typography.captionMedium,
-    fontSize: 12,
-    color: colors.ink,
-    textAlign: 'center',
   },
   sectionTitle: {
     ...typography.title,
