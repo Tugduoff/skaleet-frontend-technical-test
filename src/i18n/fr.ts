@@ -13,26 +13,32 @@ export const fr: Record<keyof typeof en, string> = {
 
   'common.cancel': 'Annuler',
 
-  'home.balance': 'Solde actuel : {{amount}}',
+  'tabs.home': 'Accueil',
+  'tabs.transfer': 'Virement',
+  'tabs.beneficiaries': 'Bénéficiaires',
+
+  'home.balanceLabel': 'Solde actuel',
+  'home.showBalance': 'Afficher le solde',
+  'home.hideBalance': 'Masquer le solde',
+  'home.transactions': 'Transactions récentes',
   'home.addTransaction': 'Ajouter une transaction',
   'home.beneficiaries': 'Bénéficiaires',
   'home.reset': 'Réinitialiser la démo',
+  'home.receiveDemo': 'Recevoir 1 000 €',
   'home.empty': 'Aucune transaction pour le moment',
-  'home.transactionId': 'Transaction n° {{id}}',
-  'home.amount': 'Montant : {{amount}}',
-  'home.to': 'Destinataire : {{name}}',
-  'home.iban': 'IBAN : {{iban}}',
-  'home.date': 'Date : {{date}}',
+  'home.emptySubtitle': 'Effectuez votre première transaction pour la voir ici',
   'home.resetTitle': 'Réinitialiser la démo',
   'home.resetMessage':
     'Restaurer le solde initial et effacer toutes les transactions et tous les bénéficiaires ?',
   'home.resetConfirm': 'Réinitialiser',
 
-  'transaction.amountPlaceholder': 'Saisir le montant',
+  'transaction.amountLabel': 'Montant',
+  'transaction.clearAmount': 'Effacer le montant',
+  'transaction.recipientLabel': 'Destinataire',
   'transaction.submit': 'Valider la transaction',
   'transaction.recipientName': 'Nom du destinataire',
   'transaction.recipientIban': 'IBAN du destinataire',
-  'transaction.manualEntry': 'Saisie manuelle…',
+  'transaction.manualEntry': 'Saisie manuelle',
   'transaction.manualHint':
     'Aucun bénéficiaire enregistré — saisissez le destinataire manuellement',
   'transaction.saveTitle': 'Enregistrer le destinataire',
@@ -43,10 +49,11 @@ export const fr: Record<keyof typeof en, string> = {
     "La transaction n'a pas abouti, veuillez réessayer",
 
   'beneficiaries.empty': 'Aucun bénéficiaire pour le moment',
+  'beneficiaries.emptySubtitle':
+    'Enregistrez des destinataires pour leur envoyer de l’argent plus vite',
   'beneficiaries.add': 'Ajouter un bénéficiaire',
   'beneficiaries.edit': 'Modifier',
   'beneficiaries.delete': 'Supprimer',
-  'beneficiaries.iban': 'IBAN : {{iban}}',
   'beneficiaries.deleteTitle': 'Supprimer le bénéficiaire',
   'beneficiaries.deleteMessage': 'Retirer {{name}} de vos bénéficiaires ?',
   'beneficiaries.deleteConfirm': 'Supprimer',

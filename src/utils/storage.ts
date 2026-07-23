@@ -68,7 +68,6 @@ interface PersistedStateV3 {
   beneficiaries: Beneficiary[];
 }
 
-/** Returns true when value is a non-negative safe integer. */
 const isNonNegativeSafeInteger = (value: unknown): value is number =>
   typeof value === 'number' &&
   Number.isInteger(value) &&
@@ -164,7 +163,6 @@ const isPersistedState = (parsed: unknown): parsed is PersistedState => {
   );
 };
 
-/** Type guard validating a v1 persisted state object. */
 const isPersistedStateV1 = (parsed: unknown): parsed is PersistedStateV1 => {
   if (typeof parsed !== 'object' || parsed === null) {
     return false;
@@ -180,7 +178,6 @@ const isPersistedStateV1 = (parsed: unknown): parsed is PersistedStateV1 => {
   );
 };
 
-/** Type guard validating a v2 persisted state object. */
 const isPersistedStateV2 = (parsed: unknown): parsed is PersistedStateV2 => {
   if (typeof parsed !== 'object' || parsed === null) {
     return false;
@@ -196,7 +193,6 @@ const isPersistedStateV2 = (parsed: unknown): parsed is PersistedStateV2 => {
   );
 };
 
-/** Type guard validating a v3 persisted state object. */
 const isPersistedStateV3 = (parsed: unknown): parsed is PersistedStateV3 => {
   if (typeof parsed !== 'object' || parsed === null) {
     return false;
@@ -212,7 +208,6 @@ const isPersistedStateV3 = (parsed: unknown): parsed is PersistedStateV3 => {
   );
 };
 
-/** Extracts the schema version of a parsed payload, or null when absent. */
 const getVersion = (value: unknown): number | null => {
   if (typeof value !== 'object' || value === null) {
     return null;

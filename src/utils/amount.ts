@@ -42,9 +42,20 @@ export const getAmountError = (
   return null;
 };
 
-/** ISO 4217 currency used across the app. */
-const CURRENCY = 'EUR';
+/**
+ * Adds `centsToAdd` to a free-form amount input and returns the canonical
+ * "123.45" string. An unparseable input counts as zero, so the quick-add
+ * chips work on an empty field too.
+ */
+export const addCentsToAmountInput = (
+  input: string,
+  centsToAdd: number,
+): string => {
+  const current = parseAmountToCents(input) ?? 0;
+  return ((current + centsToAdd) / 100).toFixed(2);
+};
 
+const CURRENCY = 'EUR';
 /**
  * Formats integer cents as a localized currency string, e.g. 1050 ->
  * "€10.50" in en-US, "10,50 €" in fr-FR.

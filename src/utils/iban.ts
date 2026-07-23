@@ -3,6 +3,15 @@ export const normalizeIban = (iban: string): string =>
   iban.replace(/\s+/g, '').toUpperCase();
 
 /**
+ * Formats an IBAN for display in printable groups of four characters
+ * (ISO 13616), e.g. "GB29 NWBK 6016 1331 9268 19".
+ */
+export const formatIban = (iban: string): string =>
+  normalizeIban(iban)
+    .replace(/(.{4})/g, '$1 ')
+    .trim();
+
+/**
  * Validates an IBAN using the ISO 13616 mod-97 checksum.
  * Accepts both electronic (no spaces) and printable (spaces) formats,
  * case-insensitively.
