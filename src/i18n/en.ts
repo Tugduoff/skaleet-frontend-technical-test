@@ -5,6 +5,7 @@ export const en = {
   'screens.addBeneficiary': 'Add Beneficiary',
   'screens.editBeneficiary': 'Edit Beneficiary',
   'screens.beneficiaryDetail': 'Beneficiary',
+  'screens.cards': 'Cartes',
 
   'common.cancel': 'Cancel',
   'common.edit': 'Edit',

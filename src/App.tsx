@@ -18,6 +18,7 @@ import { TransactionProvider, useTransactions } from './TransactionContext';
 import { t, useLanguage } from './i18n';
 import { colors, typography } from './theme';
 import type { RootStackParamList, RootTabParamList } from './types';
+import CardsScreen from './CardsScreen';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 const Tab = createBottomTabNavigator<RootTabParamList>();
@@ -73,6 +74,11 @@ const Tabs = () => {
         name="Beneficiaries"
         component={BeneficiariesScreen}
         options={{ title: t('screens.beneficiaries') }}
+      />
+      <Tab.Screen
+        name="Cards"
+        component={CardsScreen}
+        options={{ title: t('screens.cards') }}
       />
     </Tab.Navigator>
   );

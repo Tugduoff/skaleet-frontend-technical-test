@@ -28,6 +28,11 @@ const TABS = {
     label: () => t('tabs.beneficiaries'),
     testID: 'tab-beneficiaries',
   },
+  Cards: {
+    icon: UsersIcon,
+    label: () => t('tabs.beneficiaries'),
+    testID: 'tab-cards',
+  },
 } as const;
 
 /**

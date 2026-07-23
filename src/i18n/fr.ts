@@ -7,6 +7,7 @@ export const fr: Record<keyof typeof en, string> = {
   'screens.addBeneficiary': 'Ajouter un bénéficiaire',
   'screens.editBeneficiary': 'Modifier le bénéficiaire',
   'screens.beneficiaryDetail': 'Bénéficiaire',
+  'screens.cards': 'Cartes',
 
   'common.cancel': 'Annuler',
   'common.edit': 'Modifier',

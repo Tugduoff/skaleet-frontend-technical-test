@@ -24,6 +24,7 @@ export type RootTabParamList = {
   Home: undefined;
   Transaction: { prefillBeneficiaryId?: number } | undefined;
   Beneficiaries: undefined;
+  Cards: undefined;
 };
 
 /** Root stack: the tabs, plus full-screen flows pushed on top of them. */
