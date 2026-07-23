@@ -24,6 +24,7 @@ export const TextField = ({
   ...inputProps
 }: TextFieldProps) => {
   const [focused, setFocused] = useState(false);
+  const { onFocus, onBlur, ...restInputProps } = inputProps;
 
   return (
     <View style={style}>
@@ -37,9 +38,15 @@ export const TextField = ({
         <TextInput
           placeholderTextColor={colors.inkFaint}
           style={styles.input}
-          onFocus={() => setFocused(true)}
-          onBlur={() => setFocused(false)}
-          {...inputProps}
+          onFocus={event => {
+            setFocused(true);
+            onFocus?.(event);
+          }}
+          onBlur={event => {
+            setFocused(false);
+            onBlur?.(event);
+          }}
+          {...restInputProps}
         />
       </View>
       <FieldError message={error} />

@@ -23,6 +23,7 @@ import { t, useLanguage } from './i18n';
 import { colors, radius, spacing, typography } from './theme';
 import { formatAmount } from './utils/amount';
 import { formatDate } from './utils/date';
+import { normalizeIban } from './utils/iban';
 import type {
   Transaction,
   RootStackParamList,
@@ -217,7 +218,8 @@ const HomeScreen = ({ navigation }: Props) => {
         keyExtractor={item => item.id.toString()}
         renderItem={({ item, index }) => {
           const recipientIsSaved = beneficiaries.some(
-            beneficiary => beneficiary.iban === item.account.iban,
+            beneficiary =>
+              beneficiary.iban === normalizeIban(item.account.iban),
           );
           return (
             <TransactionRow

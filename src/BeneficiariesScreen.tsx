@@ -51,7 +51,7 @@ const BeneficiariesScreen = ({ navigation }: Props) => {
               })
             }
             accessibilityRole="button"
-            accessibilityLabel={t('beneficiaries.edit')}
+            accessibilityLabel={`${t('beneficiaries.edit')} ${fullName}`}
             testID={`beneficiary-edit-${item.id}`}
             style={({ pressed }) => [
               styles.rowMain,
@@ -70,7 +70,7 @@ const BeneficiariesScreen = ({ navigation }: Props) => {
           <IconButton
             icon={<Trash size={18} color={colors.danger} />}
             onPress={() => confirmDelete(item)}
-            accessibilityLabel={t('beneficiaries.delete')}
+            accessibilityLabel={`${t('beneficiaries.delete')} ${fullName}`}
             variant="danger"
             size={36}
             testID={`beneficiary-delete-${item.id}`}

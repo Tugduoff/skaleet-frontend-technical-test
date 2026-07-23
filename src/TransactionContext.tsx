@@ -191,6 +191,7 @@ export const TransactionProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const resetDemoData = () => {
+    lastId.current = 0;
     balanceRef.current = INITIAL_BALANCE_CENTS;
     setBalanceCents(INITIAL_BALANCE_CENTS);
     setTransactions([]);
@@ -198,6 +199,9 @@ export const TransactionProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const receiveFunds = (amountCents: number) => {
+    if (!Number.isInteger(amountCents) || amountCents <= 0) {
+      return;
+    }
     balanceRef.current += amountCents;
     setBalanceCents(balanceRef.current);
   };
