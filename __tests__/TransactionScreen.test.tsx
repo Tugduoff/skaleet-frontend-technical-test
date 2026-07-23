@@ -95,12 +95,16 @@ describe('TransactionScreen', () => {
     ).toBeTruthy();
   });
 
-  it('hides the submit button while the amount is empty', async () => {
+  it('hides the submit button until amount and manual recipient are filled', async () => {
     const user = userEvent.setup();
     await renderScreen();
     await screen.findByPlaceholderText('0.00');
     expect(screen.queryByText('Submit Transaction')).toBeNull();
     await user.type(screen.getByPlaceholderText('0.00'), '10');
+    // Amount alone is not enough: manual name and IBAN are still required.
+    expect(screen.queryByText('Submit Transaction')).toBeNull();
+    await user.type(screen.getByPlaceholderText('Recipient Name'), 'John Doe');
+    await user.type(screen.getByPlaceholderText('Recipient IBAN'), VALID_IBAN);
     expect(await screen.findByText('Submit Transaction')).toBeTruthy();
   });
 
@@ -108,6 +112,8 @@ describe('TransactionScreen', () => {
     const user = userEvent.setup();
     await renderScreen();
     await user.type(screen.getByPlaceholderText('0.00'), '1001');
+    await user.type(screen.getByPlaceholderText('Recipient Name'), 'John Doe');
+    await user.type(screen.getByPlaceholderText('Recipient IBAN'), VALID_IBAN);
     await user.press(screen.getByText('Submit Transaction'));
     expect(
       await screen.findByText('Amount exceeds current balance'),

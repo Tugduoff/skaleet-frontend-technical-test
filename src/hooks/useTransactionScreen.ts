@@ -27,11 +27,19 @@ export const useTransactionScreen = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const submittingRef = useRef(false);
 
-  const useManualEntry = selection === 'manual' || beneficiaries.length === 0;
-  const selectedBeneficiary = getSelectedBeneficiary(
-    beneficiaries,
-    typeof selection === 'number' ? selection : null,
-  );
+  const effectiveSelection =
+    selection === null && beneficiaries.length > 0
+      ? beneficiaries[0].id
+      : selection;
+
+  const useManualEntry =
+    effectiveSelection === 'manual' || beneficiaries.length === 0;
+
+  const selectedBeneficiary =
+    getSelectedBeneficiary(
+      beneficiaries,
+      typeof effectiveSelection === 'number' ? effectiveSelection : null,
+    ) ?? (beneficiaries.length > 0 ? beneficiaries[0] : null);
 
   /**
    * Amount setter that clears a shown error as soon as it no longer

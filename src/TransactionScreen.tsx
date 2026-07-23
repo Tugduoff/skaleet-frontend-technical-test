@@ -93,8 +93,13 @@ const TransactionScreen = ({ navigation }: Props) => {
     submit,
   } = useTransactionScreen();
   const swipeHandlers = useTabSwipe(navigation, 'Transaction');
-  // The submit CTA only appears once there is an actual amount to send.
   const amountCents = parseAmountToCents(amount);
+  const canSubmit =
+    amountCents !== null &&
+    amountCents > 0 &&
+    (useManualEntry
+      ? name.trim() !== '' && iban.trim() !== ''
+      : selectedBeneficiary !== null);
 
   const handleTransaction = () => {
     if (!submit()) {
@@ -251,7 +256,7 @@ const TransactionScreen = ({ navigation }: Props) => {
           </View>
         )}
       </ScrollView>
-      {amountCents !== null && amountCents > 0 && (
+      {canSubmit && (
         <View style={styles.ctaBar}>
           <Button
             title={t('transaction.submit')}
