@@ -5,8 +5,15 @@ appId: com.skaleetfrontendtechnicaltest
 # prefilled beneficiary form.
 - launchApp:
     clearState: true
-- tapOn: 'Add Transaction'
-- tapOn: 'Enter amount'
+# Cold starts on the emulator are slow (bundle fetch + storage init):
+# give the first screen up to 60s to appear before interacting.
+- extendedWaitUntil:
+    visible:
+      id: 'home-add-transaction'
+    timeout: 60000
+- tapOn:
+    id: 'home-add-transaction'
+- tapOn: '0.00'
 - inputText: '10'
 - hideKeyboard
 - tapOn: 'Recipient Name'
@@ -18,12 +25,15 @@ appId: com.skaleetfrontendtechnicaltest
 - tapOn: 'Submit Transaction'
 - assertVisible: 'Add John Doe to your beneficiaries?'
 - tapOn: 'No thanks'
-- assertVisible: 'Current Balance: €990.00'
-- tapOn: 'Beneficiaries'
+- assertVisible: '€990.00'
+- tapOn:
+    id: 'tab-beneficiaries'
 - assertVisible: 'No beneficiaries yet'
-- back
-- tapOn: 'Add Transaction'
-- tapOn: 'Enter amount'
+- tapOn:
+    id: 'tab-home'
+- tapOn:
+    id: 'home-add-transaction'
+- tapOn: '0.00'
 - inputText: '10'
 - hideKeyboard
 - tapOn: 'Recipient Name'
@@ -36,6 +46,7 @@ appId: com.skaleetfrontendtechnicaltest
 - tapOn: 'Save'
 # The prefilled form opens; saving it lands back on Home.
 - tapOn: 'Save Beneficiary'
-- tapOn: 'Beneficiaries'
+- tapOn:
+    id: 'tab-beneficiaries'
 - assertVisible: 'John Doe'
-- assertVisible: 'IBAN: GB29NWBK60161331926819'
+- assertVisible: 'GB29 NWBK 6016 1331 9268 19'

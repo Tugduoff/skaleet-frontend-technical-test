@@ -1,6 +1,6 @@
 import { describe, expect, it } from '@jest/globals';
 
-import { isValidIban } from '../src/utils/iban';
+import { formatIban, isValidIban } from '../src/utils/iban';
 
 describe('isValidIban', () => {
   it.each([
@@ -24,5 +24,19 @@ describe('isValidIban', () => {
     ['GBAA NWBK 6016 1331 9268 19', 'check digits not digits'],
   ])('rejects %s (%s)', iban => {
     expect(isValidIban(iban)).toBe(false);
+  });
+});
+
+describe('formatIban', () => {
+  it.each([
+    ['GB29NWBK60161331926819', 'GB29 NWBK 6016 1331 9268 19', 'groups of four'],
+    ['DE89370400440532013000', 'DE89 3704 0044 0532 0130 00', 'exact multiple'],
+    [
+      'gb29 nwbk 6016 1331 9268 19',
+      'GB29 NWBK 6016 1331 9268 19',
+      'normalized',
+    ],
+  ])('formats %s as %s (%s)', (iban, expected) => {
+    expect(formatIban(iban)).toBe(expected);
   });
 });

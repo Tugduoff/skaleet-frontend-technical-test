@@ -1,6 +1,7 @@
 import { describe, expect, it } from '@jest/globals';
 
 import {
+  addCentsToAmountInput,
   formatAmount,
   getAmountError,
   parseAmountToCents,
@@ -67,7 +68,19 @@ describe('formatAmount', () => {
     [1050, '€10.50'],
     [1, '€0.01'],
     [0, '€0.00'],
+    [-4250, '-€42.50'],
   ])('formats %i cents as %s', (cents, expected) => {
     expect(formatAmount(cents)).toBe(expected);
+  });
+});
+
+describe('addCentsToAmountInput', () => {
+  it.each([
+    ['10.50', 1000, '20.50', 'adds to a decimal amount'],
+    ['', 1000, '10.00', 'an empty field counts as zero'],
+    ['abc', 2000, '20.00', 'an invalid field counts as zero'],
+    ['0', 10000, '100.00', 'rounds to two decimals'],
+  ])('%s + %i cents = %s (%s)', (input, cents, expected) => {
+    expect(addCentsToAmountInput(input, cents)).toBe(expected);
   });
 });
