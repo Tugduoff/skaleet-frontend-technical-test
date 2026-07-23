@@ -5,8 +5,11 @@ export const en = {
   'screens.beneficiaries': 'Beneficiaries',
   'screens.addBeneficiary': 'Add Beneficiary',
   'screens.editBeneficiary': 'Edit Beneficiary',
+  'screens.beneficiaryDetail': 'Beneficiary',
 
   'common.cancel': 'Cancel',
+  'common.edit': 'Edit',
+  'common.delete': 'Delete',
 
   'tabs.home': 'Home',
   'tabs.transfer': 'Transfer',
@@ -33,7 +36,7 @@ export const en = {
   'transaction.submit': 'Submit Transaction',
   'transaction.recipientName': 'Recipient Name',
   'transaction.recipientIban': 'Recipient IBAN',
-  'transaction.manualEntry': 'Enter manually…',
+  'transaction.manualEntry': 'Enter manually',
   'transaction.manualHint':
     'No saved beneficiaries — enter the recipient manually',
   'transaction.saveTitle': 'Save recipient',
@@ -51,6 +54,12 @@ export const en = {
   'beneficiaries.deleteTitle': 'Delete beneficiary',
   'beneficiaries.deleteMessage': 'Remove {{name}} from your beneficiaries?',
   'beneficiaries.deleteConfirm': 'Delete',
+
+  'beneficiaryDetail.send': 'Send money',
+  'beneficiaryDetail.history': 'History',
+  'beneficiaryDetail.empty': 'No transactions yet',
+  'beneficiaryDetail.emptySubtitle':
+    'Send money to this recipient to see history here',
 
   'form.firstName': 'First name',
   'form.lastName': 'Last name',

@@ -65,7 +65,7 @@ export const Button = ({
 
 const styles = StyleSheet.create({
   container: {
-    minHeight: 56,
+    minHeight: 48,
     borderRadius: radius.full,
     paddingHorizontal: spacing.xl,
     flexDirection: 'row',

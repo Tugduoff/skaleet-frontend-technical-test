@@ -48,7 +48,7 @@ const seedBeneficiary = () =>
     }),
   );
 
-const renderScreen = async () => {
+const renderScreen = async (params?: { prefillBeneficiaryId?: number }) => {
   const navigation = { navigate: jest.fn(), goBack: jest.fn() };
   await render(
     <TransactionProvider>
@@ -57,7 +57,7 @@ const renderScreen = async () => {
         route={{
           key: 'transaction-test',
           name: 'Transaction',
-          params: undefined,
+          params,
         }}
       />
     </TransactionProvider>,
@@ -205,5 +205,38 @@ describe('TransactionScreen', () => {
     expect(screen.getByPlaceholderText('Recipient IBAN')).toBeTruthy();
     await user.press(screen.getByTestId('beneficiary-option-1'));
     expect(screen.queryByPlaceholderText('Recipient Name')).toBeNull();
+  });
+
+  it('pre-selects the beneficiary passed via route params', async () => {
+    const user = userEvent.setup();
+    await AsyncStorage.setItem(
+      'app-state',
+      JSON.stringify({
+        version: 3,
+        transactions: [],
+        balanceCents: 100000,
+        beneficiaries: [
+          {
+            id: 1,
+            firstName: 'First',
+            lastName: 'Beneficiary',
+            iban: 'GB29NWBK60161331926819',
+          },
+          {
+            id: 2,
+            firstName: 'Jane',
+            lastName: 'Doe',
+            iban: 'DE89370400440532013000',
+          },
+        ],
+      }),
+    );
+    const navigation = await renderScreen({ prefillBeneficiaryId: 2 });
+    await screen.findByTestId('beneficiary-option-2');
+    await user.type(screen.getByPlaceholderText('0.00'), '10');
+    await user.press(screen.getByText('Submit Transaction'));
+    await waitFor(() =>
+      expect(navigation.navigate).toHaveBeenCalledWith('Home'),
+    );
   });
 });

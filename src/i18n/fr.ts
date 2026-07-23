@@ -10,8 +10,11 @@ export const fr: Record<keyof typeof en, string> = {
   'screens.beneficiaries': 'Bénéficiaires',
   'screens.addBeneficiary': 'Ajouter un bénéficiaire',
   'screens.editBeneficiary': 'Modifier le bénéficiaire',
+  'screens.beneficiaryDetail': 'Bénéficiaire',
 
   'common.cancel': 'Annuler',
+  'common.edit': 'Modifier',
+  'common.delete': 'Supprimer',
 
   'tabs.home': 'Accueil',
   'tabs.transfer': 'Virement',
@@ -57,6 +60,12 @@ export const fr: Record<keyof typeof en, string> = {
   'beneficiaries.deleteTitle': 'Supprimer le bénéficiaire',
   'beneficiaries.deleteMessage': 'Retirer {{name}} de vos bénéficiaires ?',
   'beneficiaries.deleteConfirm': 'Supprimer',
+
+  'beneficiaryDetail.send': 'Envoyer de l’argent',
+  'beneficiaryDetail.history': 'Historique',
+  'beneficiaryDetail.empty': 'Aucune transaction pour le moment',
+  'beneficiaryDetail.emptySubtitle':
+    'Envoyez de l’argent à ce destinataire pour voir l’historique ici',
 
   'form.firstName': 'Prénom',
   'form.lastName': 'Nom',

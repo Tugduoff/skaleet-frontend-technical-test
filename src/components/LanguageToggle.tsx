@@ -62,7 +62,6 @@ const styles = StyleSheet.create({
   },
   label: {
     ...typography.captionMedium,
-    fontSize: 12,
     color: colors.inkMuted,
   },
   labelActive: {

@@ -13,22 +13,16 @@ import {
 
 import { useHomeScreen } from './hooks/useHomeScreen';
 import { useTabSwipe } from './hooks/useTabSwipe';
-import { Avatar } from './components/Avatar';
 import { EmptyState } from './components/EmptyState';
-import { FadeInView } from './components/FadeInView';
 import { IconButton } from './components/IconButton';
 import { LanguageToggle } from './components/LanguageToggle';
-import { PressableScale } from './components/PressableScale';
+import { QuickAction } from './components/QuickAction';
+import { TransactionRow } from './components/TransactionRow';
 import { t, useLanguage } from './i18n';
-import { colors, radius, spacing, typography } from './theme';
+import { colors, spacing, typography } from './theme';
 import { formatAmount } from './utils/amount';
-import { formatDate } from './utils/date';
 import { normalizeIban } from './utils/iban';
-import type {
-  Transaction,
-  RootStackParamList,
-  RootTabParamList,
-} from './types';
+import type { RootStackParamList, RootTabParamList } from './types';
 import type { CompositeScreenProps } from '@react-navigation/native';
 import type { BottomTabScreenProps } from '@react-navigation/bottom-tabs';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
@@ -37,81 +31,6 @@ type Props = CompositeScreenProps<
   BottomTabScreenProps<RootTabParamList, 'Home'>,
   NativeStackScreenProps<RootStackParamList>
 >;
-
-/** Circular quick action with a label underneath — the Revolut home pattern.
- *  Labels wrap to two lines so longer translations never truncate. */
-const QuickAction = ({
-  icon,
-  label,
-  onPress,
-  testID,
-}: {
-  icon: React.ReactNode;
-  label: string;
-  onPress: () => void;
-  testID?: string;
-}) => (
-  <PressableScale
-    onPress={onPress}
-    accessibilityRole="button"
-    accessibilityLabel={label}
-    scaleTo={0.92}
-    testID={testID}
-    style={styles.quickAction}>
-    <View style={styles.quickActionDisc}>{icon}</View>
-    <Text style={styles.quickActionLabel} numberOfLines={2}>
-      {label}
-    </Text>
-  </PressableScale>
-);
-
-/**
- * One transaction in the history: avatar, recipient, date, signed amount.
- * Tappable when the recipient is a saved beneficiary — leads there.
- */
-const TransactionRow = ({
-  transaction,
-  index,
-  showSeparator,
-  onPress,
-}: {
-  transaction: Transaction;
-  index: number;
-  showSeparator: boolean;
-  onPress?: () => void;
-}) => {
-  const content = (
-    <>
-      <Avatar name={transaction.account.name} />
-      <View style={styles.rowBody}>
-        <Text style={styles.rowName} numberOfLines={1}>
-          {transaction.account.name}
-        </Text>
-        <Text style={styles.rowDate}>{formatDate(transaction.createdAt)}</Text>
-      </View>
-      <Text style={styles.rowAmount}>
-        {formatAmount(-transaction.amountCents)}
-      </Text>
-    </>
-  );
-  return (
-    <FadeInView delay={Math.min(index, 6) * 60}>
-      {onPress ? (
-        <PressableScale
-          onPress={onPress}
-          accessibilityRole="button"
-          accessibilityLabel={transaction.account.name}
-          scaleTo={0.98}
-          style={styles.row}>
-          {content}
-        </PressableScale>
-      ) : (
-        <View style={styles.row}>{content}</View>
-      )}
-      {showSeparator && <View style={styles.separator} />}
-    </FadeInView>
-  );
-};
 
 const HomeScreen = ({ navigation }: Props) => {
   useLanguage();
@@ -217,7 +136,7 @@ const HomeScreen = ({ navigation }: Props) => {
         data={transactions}
         keyExtractor={item => item.id.toString()}
         renderItem={({ item, index }) => {
-          const recipientIsSaved = beneficiaries.some(
+          const matchedBeneficiary = beneficiaries.find(
             beneficiary =>
               beneficiary.iban === normalizeIban(item.account.iban),
           );
@@ -227,10 +146,14 @@ const HomeScreen = ({ navigation }: Props) => {
               index={index}
               showSeparator={index < transactions.length - 1}
               onPress={
-                recipientIsSaved
-                  ? () => navigation.navigate('Beneficiaries')
+                matchedBeneficiary
+                  ? () =>
+                      navigation.navigate('BeneficiaryDetail', {
+                        beneficiaryId: matchedBeneficiary.id,
+                      })
                   : undefined
               }
+              testID={`transaction-${item.id}`}
             />
           );
         }}
@@ -288,58 +211,11 @@ const styles = StyleSheet.create({
     gap: spacing.xl,
     marginTop: spacing.xxl,
   },
-  quickAction: {
-    alignItems: 'center',
-    width: 76,
-    gap: spacing.sm,
-  },
-  quickActionDisc: {
-    width: 56,
-    height: 56,
-    borderRadius: radius.full,
-    backgroundColor: colors.accentSoft,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  quickActionLabel: {
-    ...typography.captionMedium,
-    fontSize: 12,
-    color: colors.ink,
-    textAlign: 'center',
-  },
   sectionTitle: {
     ...typography.title,
     color: colors.ink,
     marginTop: spacing.xxxl,
     marginBottom: spacing.sm,
-  },
-  row: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.md,
-    paddingVertical: 14,
-  },
-  rowBody: {
-    flex: 1,
-  },
-  rowName: {
-    ...typography.bodyMedium,
-    color: colors.ink,
-  },
-  rowDate: {
-    ...typography.caption,
-    color: colors.inkMuted,
-    marginTop: 2,
-  },
-  rowAmount: {
-    ...typography.title,
-    fontVariant: ['tabular-nums'],
-    color: colors.ink,
-  },
-  separator: {
-    height: StyleSheet.hairlineWidth,
-    backgroundColor: colors.border,
-    marginLeft: 60,
   },
 });
 

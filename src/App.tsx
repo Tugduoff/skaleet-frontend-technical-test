@@ -9,6 +9,7 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import HomeScreen from './HomeScreen';
 import TransactionScreen from './TransactionScreen';
 import BeneficiariesScreen from './BeneficiariesScreen';
+import BeneficiaryDetailScreen from './BeneficiaryDetailScreen';
 import BeneficiaryFormScreen from './BeneficiaryFormScreen';
 import { ErrorBoundary } from './ErrorBoundary';
 import { GradientBackground } from './components/GradientBackground';
@@ -104,6 +105,11 @@ const AppContent = () => {
               name="Tabs"
               component={Tabs}
               options={{ headerShown: false }}
+            />
+            <Stack.Screen
+              name="BeneficiaryDetail"
+              component={BeneficiaryDetailScreen}
+              options={{ title: t('screens.beneficiaryDetail') }}
             />
             <Stack.Screen
               name="BeneficiaryForm"
