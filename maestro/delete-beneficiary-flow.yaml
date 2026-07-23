@@ -26,12 +26,14 @@ appId: com.skaleetfrontendtechnicaltest
 - tapOn: 'Save Beneficiary'
 - assertVisible: 'John Doe'
 - tapOn:
-    id: 'beneficiary-delete-1'
+    id: 'beneficiary-row-1'
+- tapOn:
+    id: 'beneficiary-detail-delete'
 - assertVisible: 'Remove John Doe from your beneficiaries?'
 - tapOn: 'Cancel'
 - assertVisible: 'John Doe'
 - tapOn:
-    id: 'beneficiary-delete-1'
+    id: 'beneficiary-detail-delete'
 # While the alert is open only the dialog is in the hierarchy, so this
 # taps the alert's confirm button (rendered uppercase by Android).
 - tapOn: 'Delete'

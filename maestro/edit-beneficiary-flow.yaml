@@ -25,7 +25,9 @@ appId: com.skaleetfrontendtechnicaltest
 - tapOn: 'Save Beneficiary'
 - assertVisible: 'John Doe'
 - tapOn:
-    id: 'beneficiary-edit-1'
+    id: 'beneficiary-row-1'
+- tapOn:
+    id: 'beneficiary-detail-edit'
 # The form is prefilled, so fields are matched by their current value.
 - tapOn: 'Doe'
 - eraseText

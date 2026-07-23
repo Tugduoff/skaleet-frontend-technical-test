@@ -1,15 +1,7 @@
 import React from 'react';
-import { Alert } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { render, screen, userEvent } from '@testing-library/react-native';
-import {
-  afterEach,
-  beforeEach,
-  describe,
-  expect,
-  it,
-  jest,
-} from '@jest/globals';
+import { beforeEach, describe, expect, it, jest } from '@jest/globals';
 import type { CompositeScreenProps } from '@react-navigation/native';
 import type { BottomTabScreenProps } from '@react-navigation/bottom-tabs';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
@@ -55,15 +47,8 @@ const renderScreen = async () => {
 };
 
 describe('BeneficiariesScreen', () => {
-  let alertSpy: jest.SpiedFunction<typeof Alert.alert>;
-
   beforeEach(async () => {
-    alertSpy = jest.spyOn(Alert, 'alert').mockImplementation(() => undefined);
     await AsyncStorage.clear();
-  });
-
-  afterEach(() => {
-    alertSpy.mockRestore();
   });
 
   it('shows an empty state when there are no beneficiaries', async () => {
@@ -78,27 +63,15 @@ describe('BeneficiariesScreen', () => {
     expect(navigation.navigate).toHaveBeenCalledWith('BeneficiaryForm');
   });
 
-  it('lists beneficiaries and navigates to edit with the beneficiary id', async () => {
+  it('lists beneficiaries and navigates to the detail screen', async () => {
     const user = userEvent.setup();
     await seedBeneficiary();
     const navigation = await renderScreen();
     expect(await screen.findByText('Jane Doe')).toBeTruthy();
     expect(screen.getByText('GB29 NWBK 6016 1331 9268 19')).toBeTruthy();
-    await user.press(screen.getByTestId('beneficiary-edit-1'));
-    expect(navigation.navigate).toHaveBeenCalledWith('BeneficiaryForm', {
+    await user.press(screen.getByTestId('beneficiary-row-1'));
+    expect(navigation.navigate).toHaveBeenCalledWith('BeneficiaryDetail', {
       beneficiaryId: 1,
     });
-  });
-
-  it('asks for confirmation before deleting a beneficiary', async () => {
-    const user = userEvent.setup();
-    await seedBeneficiary();
-    await renderScreen();
-    await user.press(await screen.findByTestId('beneficiary-delete-1'));
-    expect(alertSpy).toHaveBeenCalledWith(
-      'Delete beneficiary',
-      'Remove Jane Doe from your beneficiaries?',
-      expect.any(Array),
-    );
   });
 });

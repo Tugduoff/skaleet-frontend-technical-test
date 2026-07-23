@@ -207,7 +207,7 @@ describe('HomeScreen', () => {
     ]);
   });
 
-  it('opens the beneficiaries tab only for transactions to saved recipients', async () => {
+  it('opens the beneficiary detail screen only for transactions to saved recipients', async () => {
     await AsyncStorage.setItem(
       'app-state',
       JSON.stringify({
@@ -243,8 +243,10 @@ describe('HomeScreen', () => {
     const navigation = await renderScreen();
     await screen.findByText('Jane Doe');
     const user = userEvent.setup();
-    await user.press(screen.getByText('Jane Doe'));
-    expect(navigation.navigate).toHaveBeenCalledWith('Beneficiaries');
+    await user.press(screen.getByTestId('transaction-1'));
+    expect(navigation.navigate).toHaveBeenCalledWith('BeneficiaryDetail', {
+      beneficiaryId: 1,
+    });
     navigation.navigate.mockClear();
     // A manual, unsaved recipient is not tappable.
     await user.press(screen.getByText('Manual Bob'));
