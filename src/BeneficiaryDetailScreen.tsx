@@ -2,10 +2,10 @@ import React from 'react';
 import { View, Text, FlatList, StyleSheet } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
-  PencilSimple,
-  PaperPlaneTilt,
-  Receipt,
-  Trash,
+  PencilSimpleIcon,
+  PaperPlaneTiltIcon,
+  ReceiptIcon,
+  TrashIcon,
 } from 'phosphor-react-native';
 
 import { useBeneficiaryDetailScreen } from './hooks/useBeneficiaryDetailScreen';
@@ -30,7 +30,6 @@ const BeneficiaryDetailScreen = ({ navigation, route }: Props) => {
   const insets = useSafeAreaInsets();
 
   if (!beneficiary) {
-    // Stale deep link or the beneficiary was deleted while the screen was open.
     navigation.goBack();
     return null;
   }
@@ -68,20 +67,22 @@ const BeneficiaryDetailScreen = ({ navigation, route }: Props) => {
       </View>
       <View style={styles.actions}>
         <QuickAction
-          icon={<PaperPlaneTilt size={22} color={colors.white} weight="bold" />}
+          icon={
+            <PaperPlaneTiltIcon size={22} color={colors.white} weight="bold" />
+          }
           label={t('beneficiaryDetail.send')}
           onPress={handleSend}
           variant="primary"
           testID="beneficiary-detail-send"
         />
         <QuickAction
-          icon={<PencilSimple size={22} color={colors.primary} />}
+          icon={<PencilSimpleIcon size={22} color={colors.primary} />}
           label={t('common.edit')}
           onPress={handleEdit}
           testID="beneficiary-detail-edit"
         />
         <QuickAction
-          icon={<Trash size={22} color={colors.danger} />}
+          icon={<TrashIcon size={22} color={colors.danger} />}
           label={t('common.delete')}
           onPress={handleDelete}
           testID="beneficiary-detail-delete"
@@ -111,7 +112,7 @@ const BeneficiaryDetailScreen = ({ navigation, route }: Props) => {
         ListHeaderComponent={listHeader}
         ListEmptyComponent={
           <EmptyState
-            icon={<Receipt size={40} color={colors.accent} />}
+            icon={<ReceiptIcon size={40} color={colors.accent} />}
             title={t('beneficiaryDetail.empty')}
             subtitle={t('beneficiaryDetail.emptySubtitle')}
           />

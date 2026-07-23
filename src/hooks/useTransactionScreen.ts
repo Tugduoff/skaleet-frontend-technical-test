@@ -19,7 +19,7 @@ import type { Account } from '../types';
  * when landing here from the beneficiary detail screen.
  */
 export const useTransactionScreen = (prefillBeneficiaryId?: number) => {
-  const { addTransaction, balanceCents, beneficiaries } = useTransactions();
+  const { balanceCents, beneficiaries, addTransaction } = useTransactions();
   const prefillExists =
     prefillBeneficiaryId !== undefined &&
     beneficiaries.some(beneficiary => beneficiary.id === prefillBeneficiaryId);
@@ -110,24 +110,17 @@ export const useTransactionScreen = (prefillBeneficiaryId?: number) => {
     }
     submittingRef.current = true;
     setIsSubmitting(true);
-    // The context re-validates and can still refuse, e.g. if the balance
-    // changed since this screen rendered.
     if (!addTransaction(amount, account)) {
       submittingRef.current = false;
       setAmountError(t('transaction.submitFailed'));
       setIsSubmitting(false);
       return false;
     }
-    // Success: clear the form so the tab is fresh for the next transfer.
-    // When prefilling a beneficiary, keep that selection so the user can
-    // send again without re-picking the recipient.
     setAmount('');
     setName('');
     setIban('');
     setSelection(prefillExists ? prefillBeneficiaryId : null);
     setIsSubmitting(false);
-    // Release the re-entry guard on the next tick: a same-tick double tap
-    // stays blocked, but the (never-unmounted) tab screen can submit again.
     setTimeout(() => {
       submittingRef.current = false;
     }, 0);
@@ -136,20 +129,20 @@ export const useTransactionScreen = (prefillBeneficiaryId?: number) => {
 
   return {
     amount,
-    setAmount: handleAmountChange,
-    name,
-    setName,
-    iban,
-    setIban,
-    selection,
-    setSelection,
     amountError,
-    nameError,
+    beneficiaries,
+    iban,
     ibanError,
     isSubmitting,
-    useManualEntry,
+    name,
+    nameError,
     selectedBeneficiary,
-    beneficiaries,
+    selection,
+    useManualEntry,
+    setAmount: handleAmountChange,
+    setIban,
+    setName,
+    setSelection,
     submit,
   };
 };

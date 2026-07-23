@@ -15,8 +15,6 @@ const dictionaries: Record<Language, Record<TranslationKey, string>> = {
 export const deviceLocale: string =
   Intl.NumberFormat().resolvedOptions().locale || 'en';
 
-// Only French and English ship for now; every other locale falls back to
-// English.
 let currentLanguage: Language = deviceLocale.toLowerCase().startsWith('fr')
   ? 'fr'
   : 'en';

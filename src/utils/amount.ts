@@ -14,7 +14,6 @@ export const parseAmountToCents = (amount: string): number | null => {
   if (!/^\d+(\.\d{1,2})?$/.test(normalized)) {
     return null;
   }
-  // Math.round guards against float representation, e.g. 10.10 * 100.
   return Math.round(Number(normalized) * 100);
 };
 

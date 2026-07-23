@@ -19,33 +19,16 @@ interface BeneficiaryInput {
 }
 
 interface TransactionContextValue {
-  transactions: Transaction[];
-  /** Current balance in integer cents. */
   balanceCents: number;
-  /**
-   * Validates and applies a transaction. Returns false and changes nothing
-   * when the amount is invalid or would overdraw the balance.
-   */
-  addTransaction: (amount: string, account: Account) => boolean;
   beneficiaries: Beneficiary[];
-  addBeneficiary: (input: BeneficiaryInput) => void;
-  /**
-   * Updates an existing beneficiary. Returns false and changes nothing when
-   * another beneficiary already uses the IBAN.
-   */
-  updateBeneficiary: (id: number, input: BeneficiaryInput) => boolean;
-  deleteBeneficiary: (id: number) => void;
-  /**
-   * Adds funds straight to the balance without recording a transaction.
-   * Demo shortcut.
-   */
-  receiveFunds: (amountCents: number) => void;
-  /**
-   * Restores the initial demo state: initial balance, no transactions,
-   * no beneficiaries. Persisted by the usual save effect.
-   */
-  resetDemoData: () => void;
   isLoading: boolean;
+  transactions: Transaction[];
+  addBeneficiary: (input: BeneficiaryInput) => void;
+  addTransaction: (amount: string, account: Account) => boolean;
+  deleteBeneficiary: (id: number) => void;
+  receiveFunds: (amountCents: number) => void;
+  resetDemoData: () => void;
+  updateBeneficiary: (id: number, input: BeneficiaryInput) => boolean;
 }
 
 const TransactionContext = createContext<TransactionContextValue | undefined>(
@@ -62,7 +45,7 @@ export const useTransactions = () => {
   return context;
 };
 
-export const INITIAL_BALANCE_CENTS = 100_000; // 1000.00
+export const INITIAL_BALANCE_CENTS = 100_000;
 
 export const TransactionProvider = ({ children }: { children: ReactNode }) => {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
@@ -209,16 +192,16 @@ export const TransactionProvider = ({ children }: { children: ReactNode }) => {
   return (
     <TransactionContext.Provider
       value={{
-        transactions,
-        addTransaction,
         balanceCents,
         beneficiaries,
+        isLoading,
+        transactions,
         addBeneficiary,
-        updateBeneficiary,
+        addTransaction,
         deleteBeneficiary,
         receiveFunds,
         resetDemoData,
-        isLoading,
+        updateBeneficiary,
       }}>
       {children}
     </TransactionContext.Provider>

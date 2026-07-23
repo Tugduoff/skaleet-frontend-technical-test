@@ -1,4 +1,3 @@
-/** English strings — the source of truth for translation keys. */
 export const en = {
   'screens.home': 'Home',
   'screens.transaction': 'Transaction',

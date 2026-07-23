@@ -4,7 +4,6 @@ import type { StyleProp, ViewStyle } from 'react-native';
 
 interface FadeInViewProps {
   children: React.ReactNode;
-  /** Milliseconds before the animation starts — stagger list rows with it. */
   delay?: number;
   style?: StyleProp<ViewStyle>;
 }

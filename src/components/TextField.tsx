@@ -6,9 +6,7 @@ import { FieldError } from './FieldError';
 import { colors, radius, spacing, typography } from '../theme';
 
 interface TextFieldProps extends Omit<TextInputProps, 'style'> {
-  /** Leading icon, tinted to match the field state. */
   icon?: React.ReactNode;
-  /** Validation message shown under the field; also turns the border red. */
   error?: string;
   style?: StyleProp<ViewStyle>;
 }

@@ -7,7 +7,7 @@ import {
   Platform,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Bank, Check, User } from 'phosphor-react-native';
+import { BankIcon, CheckIcon, UserIcon } from 'phosphor-react-native';
 
 import { useBeneficiaryForm } from './hooks/useBeneficiaryForm';
 import { Avatar } from './components/Avatar';
@@ -25,17 +25,16 @@ const BeneficiaryFormScreen = ({ navigation, route }: Props) => {
   useLanguage();
   const {
     firstName,
-    setFirstName,
-    lastName,
-    setLastName,
-    iban,
-    setIban,
     firstNameError,
-    lastNameError,
+    iban,
     ibanError,
+    lastName,
+    lastNameError,
+    setFirstName,
+    setIban,
+    setLastName,
     submit,
   } = useBeneficiaryForm(route.params ?? {});
-  // The stack header covers the top inset; keep content off the gesture bar.
   const insets = useSafeAreaInsets();
 
   const handleSave = () => {
@@ -49,11 +48,7 @@ const BeneficiaryFormScreen = ({ navigation, route }: Props) => {
   return (
     <KeyboardAvoidingView
       style={styles.container}
-      // Android pans the window instead (adjustPan in the manifest).
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
-      {/* Paints an opaque backdrop inside the screen itself: without it the
-          transparent screen lets the previous one show through during the
-          push transition, blending both for the whole animation. */}
       <GradientBackground />
       <ScrollView
         contentContainerStyle={[
@@ -64,14 +59,14 @@ const BeneficiaryFormScreen = ({ navigation, route }: Props) => {
         <View style={styles.preview}>
           {previewName === '' ? (
             <View style={styles.previewPlaceholder}>
-              <User size={34} color={colors.accent} />
+              <UserIcon size={34} color={colors.accent} />
             </View>
           ) : (
             <Avatar name={previewName} size={84} />
           )}
         </View>
         <TextField
-          icon={<User size={20} color={colors.inkFaint} />}
+          icon={<UserIcon size={20} color={colors.inkFaint} />}
           value={firstName}
           onChangeText={setFirstName}
           placeholder={t('form.firstName')}
@@ -79,7 +74,7 @@ const BeneficiaryFormScreen = ({ navigation, route }: Props) => {
           error={firstNameError}
         />
         <TextField
-          icon={<User size={20} color={colors.inkFaint} />}
+          icon={<UserIcon size={20} color={colors.inkFaint} />}
           value={lastName}
           onChangeText={setLastName}
           placeholder={t('form.lastName')}
@@ -88,7 +83,7 @@ const BeneficiaryFormScreen = ({ navigation, route }: Props) => {
           style={styles.field}
         />
         <TextField
-          icon={<Bank size={20} color={colors.inkFaint} />}
+          icon={<BankIcon size={20} color={colors.inkFaint} />}
           value={iban}
           onChangeText={setIban}
           placeholder={t('form.iban')}
@@ -99,7 +94,7 @@ const BeneficiaryFormScreen = ({ navigation, route }: Props) => {
         />
         <Button
           title={t('form.save')}
-          icon={<Check size={20} color={colors.white} weight="bold" />}
+          icon={<CheckIcon size={20} color={colors.white} weight="bold" />}
           onPress={handleSave}
           style={styles.save}
         />

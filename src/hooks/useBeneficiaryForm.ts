@@ -6,7 +6,6 @@ import { isValidIban, normalizeIban } from '../utils/iban';
 
 /** Route parameters accepted by BeneficiaryFormScreen. */
 export interface BeneficiaryFormParams {
-  /** Present to edit an existing beneficiary, absent to create one. */
   beneficiaryId?: number;
   prefillFirstName?: string;
   prefillLastName?: string;
@@ -70,7 +69,6 @@ export const useBeneficiaryForm = (params: BeneficiaryFormParams) => {
       return false;
     }
     if (isEditMode) {
-      // The beneficiary could have been deleted while the form was open.
       if (!editing) {
         return false;
       }
@@ -89,16 +87,16 @@ export const useBeneficiaryForm = (params: BeneficiaryFormParams) => {
   };
 
   return {
-    isEditMode,
     firstName,
-    setFirstName,
-    lastName,
-    setLastName,
-    iban,
-    setIban,
     firstNameError,
-    lastNameError,
+    iban,
     ibanError,
+    isEditMode,
+    lastName,
+    lastNameError,
+    setFirstName,
+    setIban,
+    setLastName,
     submit,
   };
 };

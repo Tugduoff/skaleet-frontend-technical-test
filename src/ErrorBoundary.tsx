@@ -1,7 +1,7 @@
 import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { WarningCircle } from 'phosphor-react-native';
+import { WarningCircleIcon } from 'phosphor-react-native';
 
 import { Button } from './components/Button';
 import { t } from './i18n';
@@ -31,7 +31,7 @@ const Fallback = ({
         { paddingTop: insets.top, paddingBottom: insets.bottom },
       ]}>
       <View style={styles.disc}>
-        <WarningCircle size={44} color={colors.danger} weight="fill" />
+        <WarningCircleIcon size={44} color={colors.danger} weight="fill" />
       </View>
       <Text style={styles.title}>{t('errorBoundary.title')}</Text>
       <Text style={styles.message}>{error.message}</Text>

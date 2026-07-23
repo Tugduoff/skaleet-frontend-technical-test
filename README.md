@@ -21,3 +21,40 @@ Note: you have free rein in how you want to implement this test, give it you bes
 Please share with us your Git repository where you have stored your implemented solution. Document all the commands needed to install and launch this project, excluding the installation of any external SDKs/platforms, our focus will remain strictly on this project.
 
 We hope that you will enjoy taking this test, best of luck!
+
+## Requirements
+
+- Node >= 24 (see `.nvmrc`)
+- iOS/Android SDKs and simulators/emulators set up as per the React Native environment setup guide (not covered here)
+
+## Install
+
+```bash
+npm install
+```
+
+## Run
+
+Start the Metro bundler:
+
+```bash
+npm start
+```
+
+In another terminal, launch the app on a simulator/emulator:
+
+```bash
+npm run ios
+# or
+npm run android
+```
+
+## Other useful commands
+
+```bash
+npm run typecheck   # TypeScript type checking
+npm run lint        # ESLint
+npm run prettier    # Check formatting
+npm test            # Unit tests (Jest)
+npm run test:e2e    # End-to-end tests (Maestro), app must already be running on a device/simulator
+```

@@ -10,7 +10,6 @@ export type IconButtonVariant = 'default' | 'danger' | 'onDark';
 interface IconButtonProps {
   icon: React.ReactNode;
   onPress: () => void;
-  /** Icon-only buttons must stay accessible; also used by tests and e2e. */
   accessibilityLabel: string;
   variant?: IconButtonVariant;
   size?: number;
